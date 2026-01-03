@@ -1,0 +1,48 @@
+<script setup>
+defineProps({
+  sales: Array,
+  loading: Boolean,
+});
+defineEmits(['view']);
+</script>
+
+<template>
+  <div>
+    <div v-if="loading">Cargando ventas...</div>
+
+    <table v-else class="table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Total</th>
+          <th>Pago</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="s in sales" :key="s.id">
+          <td>{{ new Date(s.created_at).toLocaleString() }}</td>
+          <td>S/ {{ s.total }}</td>
+          <td>{{ s.payment_method }}</td>
+          <td>
+            <button @click="$emit('view', s)">Ver</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div v-if="sales.length === 0">No hay ventas</div>
+  </div>
+</template>
+
+<style scoped>
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+}
+</style>

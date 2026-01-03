@@ -1,0 +1,358 @@
+/* -------------------
+   VARIABLES Y BASE
+------------------- */
+:root {
+  --color-bg: #1e1e2f;
+  --color-bg-light: #f5f5f5;
+  --color-card: #2a2a3d;
+  --color-card-light: #ffffff;
+  --color-text: #f5f5f5;
+  --color-text-light: #111111;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #6366f1;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --transition-speed: 0.3s;
+  --sidebar-width: 220px;
+  --sidebar-collapsed-width: 60px;
+  --topbar-height: 60px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  min-width: 320px;
+  min-height: 100vh; /* 
+  background-color: var(--color-bg); */
+  color: var(--color-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Enlaces */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Botones base */
+button {
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6em 1.2em;
+  transition: background-color var(--transition-speed),
+    border var(--transition-speed);
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* -------------------
+   DASHBOARD LAYOUT
+------------------- */
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--color-card-light);
+  color: var(--color-text-light);
+  width: var(--sidebar-width);
+  transition: width var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar .brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 1rem;
+  color: var(--color-primary);
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.sidebar nav {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar button.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border-radius: 6px;
+  text-align: left;
+  transition: background var(--transition-speed);
+  font-size: 0.95rem;
+}
+
+.sidebar button.menu-btn:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+}
+
+.sidebar button.toggle-btn {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  background: none;
+}
+
+/* Contenedor principal (topbar + main) */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+/* Topbar */
+.topbar {
+  height: var(--topbar-height);
+  background-color: var(--color-card-light);
+  color: var(--color-text-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Main */
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* -------------------
+   CARDS
+------------------- */
+.card {
+  background-color: var(--color-card);
+  color: var(--color-text);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* StatCard */
+.stat-card {
+  background-color: var(--color-card-light);
+  color: var(--color-text-light);
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.stat-card p.title {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.stat-card p.value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+/* Botones especiales */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  color: white;
+}
+.btn-danger:hover {
+  background-color: var(--color-danger-hover);
+}
+
+/* -------------------
+   DASHBOARD GRID
+------------------- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* -------------------
+   RESPONSIVE
+------------------- */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: absolute;
+    z-index: 100;
+    height: 100%;
+    left: -220px;
+  }
+  .sidebar.open {
+    left: 0;
+  }
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 0 1rem;
+    font-size: 0.9rem;
+  }
+
+  .stat-card {
+    padding: 0.75rem;
+  }
+
+  main {
+    padding: 1rem;
+  }
+}
+
+/* Sidebar base */
+.sidebar {
+  background-color: var(--color-card-light);
+  color: var(--color-text-light);
+  width: var(--sidebar-width); /* 220px */
+  transition: width var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width); /* 60px */
+}
+
+/* Brand / logo */
+.sidebar .brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 1rem;
+  color: var(--color-primary);
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Nav buttons */
+.sidebar nav {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar button.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border-radius: 6px;
+  text-align: left;
+  transition: background var(--transition-speed);
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ocultar texto cuando collapsed */
+.sidebar.collapsed button.menu-btn span {
+  display: none;
+}
+
+/* Hover effect */
+.sidebar button.menu-btn:hover {
+  background-color: rgba(79, 70, 229, 0.1);
+}
+
+/* Toggle button */
+.sidebar button.toggle-btn {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* -------------------
+   RESPONSIVE
+------------------- */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: absolute;
+    z-index: 100;
+    left: -220px; /* fuera de pantalla por defecto */
+  }
+  .sidebar.open {
+    left: 0; /* aparece al abrir */
+  }
+}
+
+/* Botón de logout al fondo del sidebar */
+.sidebar .logout-btn {
+  margin-top: auto; /* empuja hacia abajo */
+  background-color: var(--color-danger);
+  color: white;
+}
+
+.sidebar .logout-btn:hover {
+  background-color: var(--color-danger-hover);
+}
