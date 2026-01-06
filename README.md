@@ -78,15 +78,6 @@ Actualmente funciona **100% online**, con una interfaz optimizada para escritori
 - Uso como aplicación nativa
 - Mejor rendimiento offline
 
-### 📑 Reportes
-- Reportes diarios / mensuales
-- Exportación a PDF
-- Resumen por producto
-
-### 🔐 Seguridad
-- Reglas avanzadas por rol
-- Auditoría de acciones
-
 ---
 
 ## 🖥️ Instalación en entorno local
