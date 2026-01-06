@@ -6,24 +6,18 @@ import { supabase } from '../lib/supabase';
 const router = useRouter();
 const route = useRoute();
 const open = ref(false);
-const role = ref(''); // rol del usuario
+const role = ref('');
 
-// Obtener rol al cargar el sidebar
 const getUserRole = async () => {
   try {
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) return;
 
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', session.session.user.id)
       .maybeSingle();
-
-    if (error) {
-      console.error('Error al obtener rol:', error);
-      return;
-    }
 
     role.value = profile?.role || 'admin';
   } catch (err) {
@@ -31,25 +25,20 @@ const getUserRole = async () => {
   }
 };
 
-// Navegar a ruta y cerrar sidebar automáticamente
 const go = (path) => {
   router.push(path);
   open.value = false;
 };
 
-// Cerrar sesión
 const logout = async () => {
   try {
     await supabase.auth.signOut({ scope: 'local' });
-  } catch (e) {
-    console.warn('Sesión ya cerrada');
   } finally {
     router.push('/login');
     open.value = false;
   }
 };
 
-// Cerrar sidebar al hacer click fuera
 const handleClickOutside = (event) => {
   const sidebar = document.querySelector('.sidebar');
   const toggleBtn = document.querySelector('.toggle');
@@ -62,7 +51,6 @@ const handleClickOutside = (event) => {
   }
 };
 
-// Cerrar sidebar al cambiar de ruta
 watch(route, () => {
   open.value = false;
 });
@@ -76,7 +64,12 @@ onMounted(() => {
 <template>
   <!-- SIDEBAR -->
   <aside :class="['sidebar', open ? 'open' : 'closed']">
-    <h2 class="brand">POS System</h2>
+    <!-- HEADER (logo alineado al toggle) -->
+    <div class="sidebar-header">
+      <div class="brand-logo">
+        <img src="/logo.png" alt="KioPOS Logo" />
+      </div>
+    </div>
 
     <nav class="nav-items">
       <button v-if="role === 'admin'" @click="go('/')" class="btn">
@@ -90,11 +83,10 @@ onMounted(() => {
       <button v-if="role === 'admin'" @click="go('/users')" class="btn">
         Usuarios
       </button>
-      <!-- <button v-if="role === 'admin'" @click="go('/settings')" class="btn">
-        Config
-      </button> -->
 
-      <button class="btn logout" @click="logout">🔒 Cerrar sesión</button>
+      <button class="btn logout" @click="logout">
+        🔒 Cerrar sesión
+      </button>
     </nav>
   </aside>
 
@@ -108,7 +100,7 @@ onMounted(() => {
   width: 240px;
   max-width: 80%;
   height: 100vh;
-  background: linear-gradient(180deg, #1e293b, #334155);
+  background: linear-gradient(180deg, #0b3c5d, #1f5f8b);
   color: #fff;
   position: fixed;
   top: 0;
@@ -118,24 +110,35 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   padding: 20px;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
 }
 
 .sidebar.closed {
   transform: translateX(-100%);
 }
 
-/* BRAND */
-.brand {
-  font-size: 22px;
-  font-weight: 700;
-  color: #f8fafc;
-  margin-bottom: 30px;
-  text-align: center;
-  letter-spacing: 1px;
+/* HEADER */
+.sidebar-header {
+  height: 56px; /* misma altura visual que el toggle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-/* NAV ITEMS */
+/* LOGO */
+.brand-logo {
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.brand-logo img {
+  max-width: 90px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* NAV */
 .nav-items {
   display: flex;
   flex-direction: column;
@@ -146,10 +149,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   border: none;
-  color: #f1f5f9;
+  color: #f8fafc;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
@@ -157,7 +160,7 @@ onMounted(() => {
 }
 
 .btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
   transform: translateX(3px);
 }
 
@@ -170,27 +173,26 @@ onMounted(() => {
 
 .logout:hover {
   background: #dc2626;
-  transform: translateX(3px);
 }
 
-/* BOTÓN TOGGLE */
+/* TOGGLE */
 .toggle {
   position: fixed;
   top: 15px;
   left: 15px;
   z-index: 2001;
-  background: #3b82f6;
+  background: #1fa2c1;
   color: #fff;
   border: none;
   padding: 12px 16px;
   font-size: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
 
 .toggle:hover {
-  background: #2563eb;
+  background: #0ea5e9;
 }
 
 /* RESPONSIVE */
@@ -198,6 +200,11 @@ onMounted(() => {
   .sidebar {
     width: 200px;
     padding: 18px;
+  }
+
+  .brand-logo img {
+    max-width: 80px;
+    margin-top: 18px;
   }
 
   .btn {

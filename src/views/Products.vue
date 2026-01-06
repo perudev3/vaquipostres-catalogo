@@ -54,12 +54,12 @@ const user = ref(null);
 const filterName = ref('');
 
 /* =========================
-   NUEVO: EDICIÓN
+   EDICIÓN
 ========================= */
 const editingProduct = ref(null);
 
 /* =========================
-   CARGAR USUARIO + PRODUCTOS
+   CARGAR PRODUCTOS
 ========================= */
 const loadProducts = async () => {
   const {
@@ -109,7 +109,6 @@ const saveProduct = async () => {
     });
   }
 
-  // limpiar
   name.value = '';
   price.value = '';
   stock.value = '';
@@ -121,9 +120,6 @@ const saveProduct = async () => {
   loadProducts();
 };
 
-/* =========================
-   NUEVO: EDITAR
-========================= */
 const editProduct = (product) => {
   editingProduct.value = product;
   name.value = product.name;
@@ -133,18 +129,12 @@ const editProduct = (product) => {
   showModal.value = true;
 };
 
-/* =========================
-   NUEVO: ELIMINAR
-========================= */
 const deleteProduct = async (product) => {
   if (!confirm('¿Eliminar producto?')) return;
   await supabase.from('products').delete().eq('id', product.id);
   loadProducts();
 };
 
-/* =========================
-   FILTRO POR NOMBRE
-========================= */
 const filteredProducts = computed(() =>
   products.value.filter((p) =>
     p.name.toLowerCase().includes(filterName.value.toLowerCase())
@@ -163,16 +153,10 @@ onMounted(loadProducts);
       </button>
     </div>
 
-    <!-- FILTRO POR NOMBRE -->
     <div class="filter-section">
-      <input
-        type="text"
-        v-model="filterName"
-        placeholder="Buscar producto..."
-      />
+      <input type="text" v-model="filterName" placeholder="Buscar producto..." />
     </div>
 
-    <!-- PRODUCT LIST CON SCROLL -->
     <div class="product-list-container">
       <div v-if="filteredProducts.length === 0" class="no-products">
         No hay productos registrados
@@ -181,7 +165,7 @@ onMounted(loadProducts);
       <div class="product-list">
         <div v-for="p in filteredProducts" :key="p.id" class="product-card">
           <div class="img-container">
-            <img v-if="p.image_url" :src="p.image_url" alt="producto" />
+            <img v-if="p.image_url" :src="p.image_url" />
             <div v-else class="placeholder">Sin imagen</div>
           </div>
 
@@ -192,16 +176,13 @@ onMounted(loadProducts);
           </div>
 
           <div class="actions">
-            <button class="btn-edit" @click="editProduct(p)">✏️ Editar</button>
-            <button class="btn-delete" @click="deleteProduct(p)">
-              🗑️ Eliminar
-            </button>
+            <button class="btn-edit" @click="editProduct(p)">✏️</button>
+            <button class="btn-delete" @click="deleteProduct(p)">🗑️</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAL -->
     <div v-if="showModal" class="modal-backdrop">
       <div class="modal">
         <h2>{{ editingProduct ? 'Editar producto' : 'Registrar producto' }}</h2>
@@ -209,12 +190,11 @@ onMounted(loadProducts);
         <input v-model="name" type="text" placeholder="Nombre" />
         <input v-model="price" type="number" placeholder="Precio" />
         <input v-model="stock" type="number" placeholder="Stock" />
-
         <input type="file" accept="image/*" @change="onFileChange" />
 
         <img v-if="imagePreview" :src="imagePreview" class="preview-img" />
 
-        <button class="btn-primary" @click="saveProduct">💾 Guardar</button>
+        <button class="btn-primary" @click="saveProduct">Guardar</button>
         <button class="btn-cancel" @click="showModal = false">Cancelar</button>
       </div>
     </div>
@@ -222,13 +202,16 @@ onMounted(loadProducts);
 </template>
 
 <style scoped>
+/* ===============================
+   KioPOS – Productos (Responsive)
+=============================== */
+
 .products-page {
   padding: 20px;
   background: #f3f4f6;
   min-height: 100vh;
-  box-sizing: border-box;
   font-family: 'Segoe UI', sans-serif;
-  color: #111827; /* texto visible */
+  color: #111827;
 }
 
 /* HEADER */
@@ -236,24 +219,26 @@ onMounted(loadProducts);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .header h1 {
   font-size: 24px;
-  color: #1f2937;
+  font-weight: 700;
+  color: #4f46e5;
 }
 
 .btn-primary {
   background: #4f46e5;
-  color: white;
+  color: #fff;
   border: none;
   padding: 10px 16px;
   border-radius: 10px;
-  cursor: pointer;
   font-weight: 600;
-  transition: background 0.2s, transform 0.2s;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
 }
+
 .btn-primary:hover {
   background: #4338ca;
   transform: translateY(-1px);
@@ -263,200 +248,196 @@ onMounted(loadProducts);
 .filter-section {
   margin-bottom: 16px;
 }
+
 .filter-section input {
   width: 100%;
+  max-width: 360px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #d1d5db;
-  outline: none;
   font-size: 14px;
-  transition: all 0.2s;
+  outline: none;
 }
+
 .filter-section input:focus {
   border-color: #4f46e5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
-/* PRODUCT LIST CON SCROLL */
+/* CONTENEDOR CON SCROLL */
 .product-list-container {
   max-height: 65vh;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: 6px;
 }
+
+/* GRID RESPONSIVE */
 .product-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-/* PRODUCT CARD */
+/* CARD PRODUCTO */
 .product-card {
-  background: #1f2937; /* fondo oscuro para contraste */
-  color: #f9fafb; /* letras claras */
-  border-radius: 12px;
-  padding: 12px;
-  text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  gap: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.15);
+}
+
+/* IMAGEN */
 .img-container {
   width: 100%;
-  height: 120px;
-  margin-bottom: 8px;
-  border-radius: 8px;
+  height: 140px;
+  border-radius: 10px;
   overflow: hidden;
-  background: #374151;
+  background: #eef2ff;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .img-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.img-container .placeholder {
-  color: #9ca3af;
-  font-size: 12px;
+
+.placeholder {
+  font-size: 13px;
+  color: #6b7280;
 }
 
-/* INFO PRODUCTO */
+/* INFO */
 .info strong {
-  display: block;
   font-size: 16px;
-  color: #f9fafb;
-  margin-bottom: 4px;
+  color: #111827;
 }
+
 .info span {
-  display: block;
   font-size: 14px;
-  color: #e5e7eb;
+  color: #4f46e5;
+  font-weight: 600;
 }
+
 .info small {
-  display: block;
-  font-size: 12px;
-  color: #d1d5db;
+  font-size: 13px;
+  color: #6b7280;
 }
 
 /* ACCIONES */
 .actions {
   display: flex;
-  justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
+  margin-top: auto;
 }
-.btn-edit {
-  flex: 1;
-  background: #facc15;
-  color: #111827;
-  border: none;
-  border-radius: 8px;
-  padding: 6px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-edit:hover {
-  background: #eab308;
-}
+
+.btn-edit,
 .btn-delete {
   flex: 1;
-  background: #ef4444;
-  color: white;
   border: none;
+  padding: 8px;
   border-radius: 8px;
-  padding: 6px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
+
+.btn-edit {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.btn-edit:hover {
+  background: #c7d2fe;
+}
+
+.btn-delete {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .btn-delete:hover {
-  background: #dc2626;
+  background: #fecaca;
 }
 
 /* MODAL */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 50;
 }
 
 .modal {
-  background: white;
+  background: #ffffff;
   padding: 20px;
   width: 90%;
-  max-width: 400px;
-  border-radius: 12px;
-  text-align: center;
+  max-width: 420px;
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.modal input[type='text'],
-.modal input[type='number'],
-.modal input[type='file'] {
-  padding: 10px;
+.modal h2 {
+  color: #4f46e5;
+}
+
+.modal input {
+  padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #d1d5db;
-  outline: none;
-  font-size: 14px;
 }
+
 .modal input:focus {
   border-color: #4f46e5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
-.modal .preview-img {
+.preview-img {
   width: 100%;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-radius: 10px;
 }
 
 .btn-cancel {
   background: #9ca3af;
   color: white;
   border: none;
-  border-radius: 8px;
   padding: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-cancel:hover {
-  background: #6b7280;
+  border-radius: 8px;
 }
 
-/* NO PRODUCTOS */
+/* SIN PRODUCTOS */
 .no-products {
   text-align: center;
-  font-size: 14px;
+  padding: 30px;
   color: #6b7280;
-  margin: 20px 0;
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
-  .product-list {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-}
 @media (max-width: 480px) {
   .header h1 {
     font-size: 20px;
   }
-  .btn-primary {
-    padding: 8px 12px;
-    font-size: 14px;
+
+  .product-list {
+    grid-template-columns: 1fr;
   }
 }
+
 </style>

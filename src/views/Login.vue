@@ -3,8 +3,7 @@
     <div class="login-card">
       <!-- Logo arriba -->
       <div class="logo">
-        <!-- <img src="/logo.png" alt="Logo POS" /> -->
-        <h1>POS System</h1>
+        <img src="/logo.png" alt="KioPOS Logo" />
       </div>
 
       <form @submit.prevent="login" class="login-form">
@@ -104,52 +103,60 @@ const login = async () => {
 </script>
 
 <style scoped>
-/* Página completa centrada */
+/* Página completa */
 .login-page {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  background: linear-gradient(135deg, #0b3c5d, #1fa2c1);
   padding: 20px;
   box-sizing: border-box;
 }
 
-/* Tarjeta del login */
+/* Tarjeta */
 .login-card {
-  background: #fff;
+  background: #ffffff;
   border-radius: 24px;
   padding: 40px 30px;
   width: 100%;
-  max-width: 380px; /* ancho fijo max */
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+  max-width: 380px;
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.25);
   text-align: center;
   display: flex;
   flex-direction: column;
   gap: 25px;
-  position: relative;
   box-sizing: border-box;
 }
 
 /* Logo */
 .logo {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo img {
+  max-width: 90px;
+  height: auto;
+  object-fit: contain;
 }
 
 .logo h1 {
   font-size: 26px;
   font-weight: 700;
-  color: #4f46e5;
+  color: #0b3c5d;
 }
 
-/* Formulario */
+/* Form */
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Grupo de input */
+/* Inputs */
 .input-group {
   display: flex;
   flex-direction: column;
@@ -159,24 +166,22 @@ const login = async () => {
 .input-group label {
   font-weight: 600;
   margin-bottom: 6px;
-  color: #374151;
+  color: #0f172a;
   font-size: 14px;
 }
 
-/* Inputs estilizados */
 .input-group input {
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #cbd5e1;
   outline: none;
   font-size: 15px;
   transition: all 0.25s ease-in-out;
-  width: 100%;
 }
 
 .input-group input:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+  border-color: #1fa2c1;
+  box-shadow: 0 0 0 3px rgba(31, 162, 193, 0.25);
 }
 
 /* Botón */
@@ -184,18 +189,18 @@ button {
   padding: 14px 0;
   border-radius: 12px;
   border: none;
-  background: #4f46e5;
-  color: #fff;
+  background: #22c55e;
+  color: #ffffff;
   font-weight: 600;
   font-size: 16px;
   cursor: pointer;
   transition: all 0.25s ease-in-out;
-  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 8px 16px rgba(34, 197, 94, 0.35);
 }
 
 button:hover {
-  background: #4338ca;
-  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.4);
+  background: #16a34a;
+  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.45);
 }
 
 button:disabled {
@@ -203,11 +208,10 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Mensaje de error */
+/* Error */
 .error-msg {
   color: #dc2626;
   font-weight: 500;
-  text-align: center;
   font-size: 14px;
 }
 
@@ -217,10 +221,12 @@ button:disabled {
     padding: 30px 20px;
     max-width: 320px;
   }
-  .input-group input {
-    font-size: 14px;
-    padding: 12px 14px;
+
+  .logo img {
+    max-width: 50%;
+    margin-bottom: -50px;
   }
+
   button {
     font-size: 15px;
     padding: 12px 0;

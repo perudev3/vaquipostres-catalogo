@@ -29,7 +29,6 @@ const loadSales = async () => {
     .order('created_at', { ascending: false });
 
   if (fromDate.value) query = query.gte('created_at', fromDate.value);
-
   if (toDate.value) query = query.lte('created_at', toDate.value + 'T23:59:59');
 
   const { data } = await query;
@@ -63,22 +62,20 @@ const totalAmount = computed(() =>
 
     <!-- RESUMEN -->
     <div class="summary">
-      <div>
-        Ventas: <strong>{{ totalSales }}</strong>
-      </div>
-      <div>
-        Total: <strong>S/ {{ totalAmount.toFixed(2) }}</strong>
-      </div>
+      <div>Ventas: <strong>{{ totalSales }}</strong></div>
+      <div>Total: <strong>S/ {{ totalAmount.toFixed(2) }}</strong></div>
     </div>
 
-    <!-- TABLA -->
-    <SalesTable
-      :sales="sales"
-      :loading="loading"
-      @view="selectedSale = $event"
-    />
+    <!-- TABLA CON SCROLL -->
+    <div class="table-scroll">
+      <SalesTable
+        :sales="sales"
+        :loading="loading"
+        @view="selectedSale = $event"
+      />
+    </div>
 
-    <!-- MODAL DETALLE -->
+    <!-- MODAL -->
     <SaleDetailModal
       v-if="selectedSale"
       :sale="selectedSale"
@@ -88,156 +85,190 @@ const totalAmount = computed(() =>
 </template>
 
 <style scoped>
-/* Contenedor general */
+/* =========================
+   CONTENEDOR
+========================= */
 .reports {
   padding: 24px;
   max-width: 1200px;
-  margin: 0 auto;
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  color: #1f2937;
+  margin: auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
 }
 
-/* Título */
+/* =========================
+   TÍTULO
+========================= */
 .reports h1 {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  margin-bottom: 20px;
-  color: #4f46e5;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  margin-bottom: 18px;
+  color: #0b3c5d;
 }
 
-/* FILTROS */
+/* =========================
+   FILTROS
+========================= */
 .filters {
   display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
 }
 
 .filters input[type='date'] {
-  padding: 14px 18px;
-  border-radius: 12px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 8px;
   border: 1px solid #cbd5e1;
-  font-size: 16px;
-  outline: none;
-  transition: all 0.2s ease-in-out;
-  flex: 1 1 180px; /* más ancho para que se vean mejor */
+  font-size: 14px;
 }
 
 .filters input[type='date']:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+  outline: none;
+  border-color: #1fa2c1;
 }
 
 .filters button {
-  background-color: #4f46e5;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: #0b3c5d;
   color: white;
-  padding: 14px 24px;
   border: none;
-  border-radius: 12px;
-  cursor: pointer;
   font-weight: 600;
-  font-size: 16px;
-  transition: all 0.2s ease-in-out;
-  flex: 0 0 auto;
+  cursor: pointer;
 }
 
 .filters button:hover {
-  background-color: #4338ca;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  background: #1fa2c1;
 }
 
-/* RESUMEN */
-/* RESUMEN - compacto y elegante */
+/* =========================
+   RESUMEN
+========================= */
 .summary {
   display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
-  justify-content: flex-start; /* se alinean al inicio */
 }
 
 .summary div {
-  background: #f9fafb;
-  padding: 10px 16px; /* menos padding para que ocupe menos espacio */
-  border-radius: 10px;
-  font-size: 14px; /* más compacto */
+  background: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: transform 0.15s, box-shadow 0.15s;
-  min-width: 120px; /* ancho mínimo para que no se vea muy comprimido */
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  border-left: 4px solid #22c55e;
 }
 
-.summary div:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-}
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .summary {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .summary div {
-    width: 100%;
-    font-size: 14px;
-    padding: 10px 12px;
-  }
-}
-
-/* TABLA */
-.sales-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
+/* =========================
+   SCROLL DE TABLA
+========================= */
+.table-scroll {
+  background: white;
   border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  max-height: 360px;          /* ALTURA FIJA */
+  overflow-y: auto;           /* SCROLL INTERNO */
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
 }
 
-.sales-table th,
-.sales-table td {
-  padding: 14px 16px;
-  text-align: left;
+/* Scroll bonito */
+.table-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+  background: #1fa2c1;
+  border-radius: 6px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
+
+/* =========================
+   MODAL (KioPOS)
+========================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 60, 93, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 25px 50px rgba(0,0,0,.35);
+  z-index: 1001;
+}
+
+.modal h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #0b3c5d;
+  text-align: center;
+}
+
+.modal .detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
   font-size: 14px;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.sales-table th {
-  background-color: #f9fafb;
+.modal .detail-row span:last-child {
   font-weight: 600;
-  color: #374151;
+  color: #1fa2c1;
 }
 
-.sales-table tr:hover {
-  background-color: #f1f5f9;
+.modal .close-btn {
+  margin-top: 18px;
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-/* MODAL DETALLE */
-.modal {
-  border-radius: 12px;
-  padding: 20px;
-  background-color: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+.modal .close-btn:hover {
+  background: #dc2626;
 }
 
-/* RESPONSIVE */
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 768px) {
   .filters {
     flex-direction: column;
+    align-items: stretch;
   }
-  .summary {
-    flex-direction: column;
+
+  .table-scroll {
+    max-height: 300px;
   }
-  .filters input[type='date'] {
-    flex: 1 1 100%;
-  }
-  .filters button {
-    width: 100%;
+
+  .modal {
+    max-width: 92%;
   }
 }
 </style>
