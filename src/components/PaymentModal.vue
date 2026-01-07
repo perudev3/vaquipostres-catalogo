@@ -23,7 +23,7 @@ watch(
 <template>
   <div class="backdrop">
     <div class="modal">
-      <h3>Total a pagar</h3>
+      <h3 style="color: black;">Total a pagar</h3>
       <h2>S/ {{ total.toFixed(2) }}</h2>
 
       <select

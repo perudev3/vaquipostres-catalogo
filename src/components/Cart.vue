@@ -42,6 +42,7 @@ defineEmits(['remove', 'pay', 'update-quantity']);
   flex-direction: column;
   height: 100%;
   padding: 12px;
+  color: black;
 }
 .cart-items {
   overflow-y: auto;

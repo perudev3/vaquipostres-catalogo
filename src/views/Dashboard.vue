@@ -4,14 +4,35 @@
 
     <!-- Tarjetas estadísticas -->
     <div class="dashboard-grid">
-      <StatCard title="Ventas hoy (S/)" :value="salesToday" />
-      <StatCard title="Ganancia hoy (S/)" :value="profitToday" />
-      <StatCard title="Ganancia total (S/)" :value="totalProfit" />
-      <StatCard
-        title="Productos bajos en stock"
-        :value="lowStockProducts.length"
-      />
-    </div>
+  <StatCard
+    title="Ganancia total (S/)"
+    :value="totalProfit"
+    color="success"
+  />
+
+  <StatCard
+    title="Total egresos (S/)"
+    :value="totalExpenses"
+    color="danger"
+  />
+
+  <StatCard
+    title="Ventas hoy (S/)"
+    :value="salesToday"
+  />
+
+  <StatCard
+    title="Ganancia hoy (S/)"
+    :value="profitToday"
+    color="success"
+  />
+
+  <StatCard
+    title="Productos bajos en stock"
+    :value="lowStockProducts.length"
+  />
+</div>
+
 
     <!-- Gráficos -->
     <div class="charts-grid">
@@ -50,33 +71,15 @@
         </table>
       </div>
 
-      <!-- Paginación -->
       <div class="pagination" v-if="recentSales.length">
-        <button
-          class="page-btn"
-          :disabled="currentPage === 1"
-          @click="currentPage--"
-        >
-          ⏮
-        </button>
-
-        <span class="page-info">
-          {{ currentPage }} / {{ totalPages }}
-        </span>
-
-        <button
-          class="page-btn"
-          :disabled="currentPage === totalPages"
-          @click="currentPage++"
-        >
-          ⏭
-        </button>
+        <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">⏮</button>
+        <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+        <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">⏭</button>
       </div>
 
       <p v-else class="empty-msg">No hay ventas registradas</p>
     </div>
 
-    <!-- Productos bajos en stock -->
     <div class="table-card" v-if="lowStockProducts.length">
       <h2>Productos a renovar stock</h2>
       <div class="table-wrapper">
@@ -99,6 +102,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import StatCard from '../components/StatCard.vue';
@@ -111,6 +115,8 @@ Chart.register(...registerables);
 const salesToday = ref(0);
 const profitToday = ref(0);
 const totalProfit = ref(0);
+const totalExpenses = ref(0);
+
 const recentSales = ref([]);
 const lowStockProducts = ref([]);
 const salesLast7Days = ref([]);
@@ -125,7 +131,6 @@ const totalPages = computed(() =>
 );
 
 const paginatedSales = computed(() => {
-  if (!recentSales.value.length) return [];
   const start = (currentPage.value - 1) * perPage;
   return recentSales.value.slice(start, start + perPage);
 });
@@ -134,51 +139,71 @@ watch(recentSales, () => {
   currentPage.value = 1;
 });
 
-// Función para cargar dashboard
 const loadDashboard = async () => {
   try {
-    const { data: salesData } = await supabase
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data: sales } = await supabase
       .from('sales')
       .select('*')
-      .order('created_at', { ascending: false })
-      .limit(10);
+      .eq('user_id', user.id);
 
-    recentSales.value = salesData.map((s) => ({
+    const { data: egresos } = await supabase
+      .from('egresos')
+      .select('*')
+      .eq('user_id', user.id);
+
+    // Ventas hoy
+    const todaySales = sales.filter(s => s.created_at.startsWith(today));
+    const salesSumToday = todaySales.reduce((a, b) => a + b.total, 0);
+
+    // Egresos hoy
+    const todayExpenses = egresos.filter(e => e.created_at.startsWith(today));
+    const expensesSumToday = todayExpenses.reduce((a, b) => a + b.monto, 0);
+
+    salesToday.value = salesSumToday.toFixed(2);
+    profitToday.value = (salesSumToday - expensesSumToday).toFixed(2);
+
+    // Totales
+    const totalSales = sales.reduce((a, b) => a + b.total, 0);
+    const totalEgresos = egresos.reduce((a, b) => a + b.monto, 0);
+
+    totalExpenses.value = totalEgresos.toFixed(2);
+    totalProfit.value = (totalSales - totalEgresos).toFixed(2);
+
+    // Últimas ventas
+    recentSales.value = sales.slice(0, 10).map(s => ({
       id: s.id,
       customer: s.user_id,
       total: s.total.toFixed(2),
       date: new Date(s.created_at).toISOString().split('T')[0],
     }));
 
-    const today = new Date().toISOString().split('T')[0];
-    const todaySales = salesData.filter((s) =>
-      s.created_at.startsWith(today)
-    );
-    const salesSum = todaySales.reduce((acc, s) => acc + s.total, 0);
-    const profitSum = salesSum * 0.3;
-    salesToday.value = salesSum.toFixed(2);
-    profitToday.value = profitSum.toFixed(2);
-
-    const { data: allSales } = await supabase.from('sales').select('*');
-    totalProfit.value = allSales
-      .reduce((acc, s) => acc + s.total * 0.3, 0)
-      .toFixed(2);
-
     const { data: products } = await supabase.from('products').select('*');
-    lowStockProducts.value = products.filter((p) => p.stock <= 5);
+    lowStockProducts.value = products.filter(p => p.stock <= 5);
 
     salesLast7Days.value = [];
     profitLast7Days.value = [];
+
     for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const day = date.toISOString().split('T')[0];
-      const daySales = allSales.filter((s) =>
-        s.created_at.startsWith(day)
-      );
-      const totalSales = daySales.reduce((acc, s) => acc + s.total, 0);
-      salesLast7Days.value.push(totalSales);
-      profitLast7Days.value.push(totalSales * 0.3);
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const day = d.toISOString().split('T')[0];
+
+      const daySales = sales.filter(s => s.created_at.startsWith(day));
+      const dayExpenses = egresos.filter(e => e.created_at.startsWith(day));
+
+      const sTotal = daySales.reduce((a, b) => a + b.total, 0);
+      const eTotal = dayExpenses.reduce((a, b) => a + b.monto, 0);
+
+      salesLast7Days.value.push(sTotal);
+      profitLast7Days.value.push(sTotal - eTotal);
     }
 
     initCharts();
@@ -196,15 +221,13 @@ const initCharts = () => {
         d.setDate(d.getDate() - (6 - i));
         return d.toISOString().split('T')[0];
       }),
-      datasets: [
-        {
-          label: 'Ventas S/',
-          data: salesLast7Days.value,
-          borderColor: '#4f46e5',
-          backgroundColor: 'rgba(79,70,229,0.2)',
-          tension: 0.3,
-        },
-      ],
+      datasets: [{
+        label: 'Ventas S/',
+        data: salesLast7Days.value,
+        borderColor: '#4f46e5',
+        backgroundColor: 'rgba(79,70,229,0.2)',
+        tension: 0.3,
+      }],
     },
   });
 
@@ -216,19 +239,18 @@ const initCharts = () => {
         d.setDate(d.getDate() - (6 - i));
         return d.toISOString().split('T')[0];
       }),
-      datasets: [
-        {
-          label: 'Ganancias S/',
-          data: profitLast7Days.value,
-          backgroundColor: '#16a34a',
-        },
-      ],
+      datasets: [{
+        label: 'Ganancias S/',
+        data: profitLast7Days.value,
+        backgroundColor: '#16a34a',
+      }],
     },
   });
 };
 
 onMounted(loadDashboard);
 </script>
+
 
 <style scoped>
 .dashboard-page {

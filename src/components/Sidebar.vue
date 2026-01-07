@@ -72,13 +72,26 @@ onMounted(() => {
     </div>
 
     <nav class="nav-items">
-      <button v-if="role === 'admin'" @click="go('/')" class="btn">
-        Dashboard
-      </button>
+     <button v-if="role !== 'admin'" @click="go('/')" class="btn">
+  Dashboard
+</button>
 
-      <button @click="go('/sales')" class="btn">Ventas</button>
-      <button @click="go('/products')" class="btn">Productos</button>
-      <button @click="go('/pos')" class="btn">POS</button>
+<button v-if="role !== 'admin'" @click="go('/sales')" class="btn">
+  Ventas
+</button>
+
+<button v-if="role !== 'admin'" @click="go('/products')" class="btn">
+  Productos
+</button>
+
+<button v-if="role !== 'admin'" @click="go('/pos')" class="btn">
+  POS
+</button>
+
+<button v-if="role !== 'admin'" @click="go('/egresos')" class="btn">
+  Egresos
+</button>
+
 
       <button v-if="role === 'admin'" @click="go('/users')" class="btn">
         Usuarios

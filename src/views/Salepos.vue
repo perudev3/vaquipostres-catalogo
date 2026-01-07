@@ -9,10 +9,12 @@ import PaymentModal from '../components/PaymentModal.vue'
 const products = ref([])
 const cart = ref([])
 const showPayment = ref(false)
+const showProductsModal = ref(false)
 const paymentMethod = ref('cash')
 const user = ref(null)
 const loading = ref(false)
 const filterName = ref('')
+const showProducts = ref(false)
 
 const loadProducts = async () => {
   const { data: auth } = await supabase.auth.getUser()
@@ -37,6 +39,7 @@ const filteredProducts = computed(() =>
 
 const addToCart = (product) => {
   const item = cart.value.find(p => p.id === product.id)
+
   if (item) {
     if (item.quantity < product.stock) item.quantity += 1
   } else {
@@ -49,7 +52,7 @@ const addToCart = (product) => {
     icon: 'success',
     title: `${product.name} añadido`,
     showConfirmButton: false,
-    timer: 1200
+    timer: 900
   })
 }
 
@@ -60,8 +63,10 @@ const removeFromCart = (id) => {
 const updateQuantity = (id, value) => {
   const item = cart.value.find(p => p.id === id)
   if (item) {
-    const qty = parseFloat(value)
-    if (!isNaN(qty) && qty >= 0 && qty <= item.stock) item.quantity = qty
+    const qty = Number(value)
+    if (!isNaN(qty) && qty >= 0 && qty <= item.stock) {
+      item.quantity = qty
+    }
   }
 }
 
@@ -70,18 +75,14 @@ const total = computed(() =>
 )
 
 const saveSale = async () => {
-  if (cart.value.length === 0) {
-    return Swal.fire({
-      icon: 'warning',
-      title: 'Carrito vacío',
-      text: 'Agrega productos antes de cobrar'
-    })
+  if (!cart.value.length) {
+    return Swal.fire('Carrito vacío', 'Agrega productos', 'warning')
   }
 
   loading.value = true
 
   try {
-    const { data: sale, error } = await supabase
+    const { data: sale } = await supabase
       .from('sales')
       .insert({
         user_id: user.value.id,
@@ -90,8 +91,6 @@ const saveSale = async () => {
       })
       .select()
       .single()
-
-    if (error) throw error
 
     const items = cart.value.map(p => ({
       sale_id: sale.id,
@@ -114,13 +113,8 @@ const saveSale = async () => {
     showPayment.value = false
     loadProducts()
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Venta registrada',
-      timer: 1800,
-      showConfirmButton: false
-    })
-  } catch (e) {
+    Swal.fire('Venta registrada', '', 'success')
+  } catch {
     Swal.fire('Error', 'No se pudo guardar la venta', 'error')
   } finally {
     loading.value = false
@@ -130,39 +124,66 @@ const saveSale = async () => {
 
 <template>
   <div class="pos-layout">
-    <!-- PRODUCTOS -->
-    <div class="products-section">
-      <input
-        v-model="filterName"
-        class="filter-input"
-        placeholder="Buscar producto..."
+
+    <div class="cart-wrapper">
+
+      <!-- HEADER POS -->
+      <div class="pos-header">
+        <div>
+          <h2>Punto de Venta</h2>
+          <p class="subtitle">
+            Registra ventas y cobra a tus clientes rápidamente
+          </p>
+        </div>
+
+        <button class="btn-primary" @click="showProducts = true">
+          ➕ Agregar productos
+        </button>
+      </div>
+
+      <!-- CARRITO -->
+      <Cart
+        :cart="cart"
+        :total="total"
+        @remove="removeFromCart"
+        @update-quantity="updateQuantity"
+        @pay="showPayment = true"
       />
 
-      <div class="product-grid">
-        <div v-for="p in filteredProducts" :key="p.id" class="product-card">
-          <div class="img-container">
-            <img v-if="p.image_url" :src="p.image_url" />
-            <span v-else>Sin imagen</span>
+    </div>
+
+    <!-- MODAL PRODUCTOS -->
+    <div v-if="showProducts" class="modal-backdrop">
+      <div class="modal large">
+        <div class="modal-header">
+          <h3>Seleccionar productos</h3>
+          <button @click="showProducts = false">✕</button>
+        </div>
+
+        <input
+          v-model="filterName"
+          class="filter-input"
+          placeholder="Buscar producto por nombre..."
+        />
+
+        <div class="product-grid">
+          <div v-for="p in filteredProducts" :key="p.id" class="product-card">
+            <div class="img-container">
+              <img v-if="p.image_url" :src="p.image_url" />
+              <span v-else>Sin imagen</span>
+            </div>
+
+            <p class="name">{{ p.name }}</p>
+            <p class="price">S/ {{ p.price }}</p>
+            <p class="stock">Stock: {{ p.stock }}</p>
+
+            <button class="btn-add" @click="addToCart(p)">
+              Añadir
+            </button>
           </div>
-
-          <p class="name">{{ p.name }}</p>
-          <p class="price">S/ {{ p.price }}</p>
-          <p class="stock">Stock: {{ p.stock }}</p>
-
-          <button class="btn-add" @click="addToCart(p)">➕ Añadir</button>
         </div>
       </div>
     </div>
-
-    <!-- CARRITO -->
-    <Cart
-      class="cart-section"
-      :cart="cart"
-      :total="total"
-      @remove="removeFromCart"
-      @update-quantity="updateQuantity"
-      @pay="showPayment = true"
-    />
 
     <PaymentModal
       v-if="showPayment"
@@ -175,119 +196,214 @@ const saveSale = async () => {
   </div>
 </template>
 
+
 <style scoped>
-/* ===== BASE ===== */
 .pos-layout {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 16px;
-  padding: 16px;
   min-height: 100vh;
-  background: #f3f4f6;
-  color: #111827;
-  font-family: 'Segoe UI', sans-serif;
+  background: #f4f6f8;
+  padding: 24px;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* ===== PRODUCTOS ===== */
-.products-section {
+/* CONTENEDOR PRINCIPAL */
+.cart-wrapper {
   background: #ffffff;
-  border-radius: 14px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
+  border-radius: 20px;
+  padding: 20px;
+  max-width: 1100px;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
 }
 
-.filter-input {
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  margin-bottom: 12px;
-  font-size: 14px;
+/* HEADER */
+.pos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pos-header h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a; /* MÁS CONTRASTE */
+  letter-spacing: -0.3px;
+}
+
+/* SUBTÍTULO */
+.subtitle {
+  font-size: 15px;
+  color: #334155; /* ANTES MUY CLARO */
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+
+/* BOTÓN PRINCIPAL */
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.btn-primary:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+}
+
+/* MODAL BACKDROP */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,24,39,.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+/* MODAL */
+.modal.large {
+  background: #ffffff;
+  width: 92%;
+  max-width: 980px;
+  border-radius: 22px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  box-shadow: 0 30px 60px rgba(0,0,0,.25);
+}
+
+/* MODAL HEADER */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.modal-header h3 {
+  font-size: 22px;
+  font-weight: 700;
   color: #111827;
 }
 
-.product-grid {
-  flex: 1;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+.modal-header button {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #6b7280;
 }
 
+/* BUSCADOR */
+.filter-input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* GRID PRODUCTOS */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 18px;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+/* CARD PRODUCTO */
 .product-card {
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 10px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(0,0,0,.06);
   display: flex;
   flex-direction: column;
-  text-align: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,.08);
 }
 
+.product-card:hover {
+  transform: translateY(-2px);
+}
+
+/* IMAGEN */
 .img-container {
-  height: 90px;
-  background: #e5e7eb;
-  border-radius: 8px;
+  height: 120px;
+  border-radius: 14px;
+  background: #f1f5f9;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #374151;
-  font-size: 12px;
 }
 
 .img-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 14px;
 }
 
+/* TEXTOS */
 .name {
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: #111827;
-  margin-top: 6px;
+  margin-bottom: 4px;
 }
 
 .price {
-  color: #4f46e5;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2563eb;
 }
 
 .stock {
   font-size: 12px;
-  color: #374151;
+  color: #6b7280;
+  margin-bottom: 10px;
 }
 
+/* BOTÓN AÑADIR */
 .btn-add {
   margin-top: auto;
-  background: #4f46e5;
-  color: #ffffff;
+  background: #16a34a;
+  color: white;
   border: none;
-  border-radius: 8px;
-  padding: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .btn-add:hover {
-  background: #4338ca;
+  background: #15803d;
 }
 
-/* ===== CARRITO ===== */
-.cart-section {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 12px;
-  max-height: 85vh;
-  overflow: hidden;
+.subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .pos-layout {
-    grid-template-columns: 1fr;
-  }
 
-  .product-grid {
-    max-height: 55vh;
-  }
-}
 </style>

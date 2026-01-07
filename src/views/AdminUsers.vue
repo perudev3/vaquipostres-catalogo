@@ -8,6 +8,10 @@ const password = ref('');
 const name = ref('');
 const users = ref([]);
 const search = ref('');
+const showPasswordModal = ref(false);
+const passwordUserId = ref(null);
+const newPassword = ref('');
+
 
 const showEditModal = ref(false);
 const editUserData = ref({ id: '', email: '', name: '' });
@@ -88,6 +92,38 @@ const filteredUsers = computed(() =>
   )
 );
 
+const openPasswordModal = (user) => {
+  passwordUserId.value = user.id;
+  newPassword.value = '';
+  showPasswordModal.value = true;
+};
+
+const resetPasswordByEmail = async (user) => {
+  const res = await Swal.fire({
+    title: 'Restablecer contraseña',
+    text: `Se enviará un correo a ${user.email}`,
+    showCancelButton: true,
+    confirmButtonText: 'Enviar',
+  })
+
+  if (!res.isConfirmed) return
+
+  const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+    redirectTo: window.location.origin + '/reset-password',
+  })
+
+  if (error) {
+    Swal.fire('Error', error.message, 'error')
+  } else {
+    Swal.fire(
+      'Correo enviado',
+      'El usuario podrá cambiar su contraseña desde el correo',
+      'success'
+    )
+  }
+};
+
+
 onMounted(loadUsers);
 </script>
 
@@ -136,6 +172,7 @@ onMounted(loadUsers);
               </button>
               <button @click="openEditModal(u)">Editar</button>
               <button class="danger" @click="deleteUser(u.id)">Eliminar</button>
+              <button @click="resetPasswordByEmail(u)">Reset clave</button>
             </td>
           </tr>
         </tbody>
@@ -154,6 +191,24 @@ onMounted(loadUsers);
         </div>
       </div>
     </div>
+
+    <div v-if="showPasswordModal" class="modal-backdrop">
+  <div class="modal">
+    <h3>Cambiar contraseña</h3>
+
+    <input
+      type="password"
+      v-model="newPassword"
+      placeholder="Nueva contraseña"
+    />
+
+    <div class="modal-actions">
+      <button @click="updatePassword">Actualizar</button>
+      <button @click="showPasswordModal = false">Cancelar</button>
+    </div>
+  </div>
+</div>
+
   </div>
 </template>
 
