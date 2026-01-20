@@ -7,7 +7,7 @@ app.use(cors()); // permite cualquier origen
 app.use(express.json());
 
 const supabaseAdmin = createClient(
-  'https://rccwlaxwbwaoyjvunftk.supabase.co',
+  'https://xseiakfnbcjspcsdfqrb.supabase.co',
   process.env.SUPABASE_SERVICE_ROLE_KEY // TU service role key segura
 );
 

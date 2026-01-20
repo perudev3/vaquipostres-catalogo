@@ -23,13 +23,17 @@ const onFileChange = (e) => {
 const uploadImage = async () => {
   if (!imageFile.value) return null;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // Verificación de seguridad
+  if (!user) {
+    console.error('No hay usuario autenticado');
+    return null;
+  }
 
   const fileName = `${user.id}/product-${Date.now()}-${imageFile.value.name}`;
 
-  const { error } = await supabase.storage
+  const { data, error } = await supabase.storage
     .from('products')
     .upload(fileName, imageFile.value, {
       upsert: true,
@@ -37,12 +41,12 @@ const uploadImage = async () => {
     });
 
   if (error) {
-    console.error('Error subiendo imagen:', error);
+    console.error('Error subiendo imagen:', error.message); // Usar error.message da más detalle
     return null;
   }
 
-  const { data } = supabase.storage.from('products').getPublicUrl(fileName);
-  return data.publicUrl;
+  const { data: publicData } = supabase.storage.from('products').getPublicUrl(fileName);
+  return publicData.publicUrl;
 };
 
 /* =========================
@@ -80,44 +84,52 @@ const loadProducts = async () => {
    GUARDAR / ACTUALIZAR
 ========================= */
 const saveProduct = async () => {
-  let image_url = editingProduct.value ? editingProduct.value.image_url : null;
+  try {
+    let image_url = editingProduct.value ? editingProduct.value.image_url : null;
+    
+    if (imageFile.value) {
+      const uploaded = await uploadImage();
+      if (uploaded) image_url = uploaded;
+    }
 
-  const uploaded = await uploadImage();
-  if (uploaded) image_url = uploaded;
+    const { data: { user: authUser } } = await supabase.auth.getUser();
 
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
-
-  if (editingProduct.value) {
-    await supabase
-      .from('products')
-      .update({
-        name: name.value,
-        price: price.value,
-        stock: stock.value,
-        image_url,
-      })
-      .eq('id', editingProduct.value.id);
-  } else {
-    await supabase.from('products').insert({
+    // OBJETO DE DATOS: Nota que NO incluimos el campo 'id' aquí
+    const productData = {
       name: name.value,
-      price: price.value,
-      stock: stock.value,
-      image_url,
+      price: parseFloat(price.value) || 0,
+      stock: parseInt(stock.value) || 0,
+      image_url: image_url,
       user_id: authUser.id,
-    });
+    };
+
+    if (editingProduct.value) {
+      // ACTUALIZAR
+      const { error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', editingProduct.value.id);
+      if (error) throw error;
+    } else {
+      // INSERTAR NUEVO (El ID se generará solo en la BD ahora)
+      const { error } = await supabase
+        .from('products')
+        .insert([productData]);
+      if (error) throw error;
+    }
+
+    // LIMPIEZA
+    name.value = ''; price.value = ''; stock.value = '';
+    imageFile.value = null; editingProduct.value = null;
+    showModal.value = false;
+
+    await loadProducts();
+    alert("¡Producto guardado exitosamente!");
+
+  } catch (err) {
+    console.error(err);
+    alert("Error: " + err.message);
   }
-
-  name.value = '';
-  price.value = '';
-  stock.value = '';
-  imageFile.value = null;
-  file.value = null;
-  editingProduct.value = null;
-
-  showModal.value = false;
-  loadProducts();
 };
 
 const editProduct = (product) => {

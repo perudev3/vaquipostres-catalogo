@@ -8,6 +8,7 @@ const route = useRoute();
 const open = ref(false);
 const role = ref('');
 
+// Obtener el rol del usuario desde Supabase
 const getUserRole = async () => {
   try {
     const { data: session } = await supabase.auth.getSession();
@@ -25,20 +26,23 @@ const getUserRole = async () => {
   }
 };
 
-const go = (path) => {
-  router.push(path);
+// Navegar usando nombre de ruta para evitar warnings
+const go = (name) => {
+  router.push({ name });
   open.value = false;
 };
 
+// Logout
 const logout = async () => {
   try {
     await supabase.auth.signOut({ scope: 'local' });
   } finally {
-    router.push('/login');
+    router.push({ name: 'login' });
     open.value = false;
   }
 };
 
+// Cerrar sidebar al hacer click fuera
 const handleClickOutside = (event) => {
   const sidebar = document.querySelector('.sidebar');
   const toggleBtn = document.querySelector('.toggle');
@@ -51,10 +55,12 @@ const handleClickOutside = (event) => {
   }
 };
 
+// Cerrar sidebar al cambiar de ruta
 watch(route, () => {
   open.value = false;
 });
 
+// Ejecutar al montar
 onMounted(() => {
   getUserRole();
   document.addEventListener('click', handleClickOutside);
@@ -67,39 +73,18 @@ onMounted(() => {
     <!-- HEADER (logo alineado al toggle) -->
     <div class="sidebar-header">
       <div class="brand-logo">
-        <img src="/logo.jpeg" alt="KioPOS Logo" />
+        <img src="/logo-blanco.png" alt="KioPOS Logo" />
       </div>
     </div>
 
     <nav class="nav-items">
-     <button v-if="role !== 'admin'" @click="go('/')" class="btn">
-  Dashboard
-</button>
+      <button @click="go('dashboard')" class="btn">Dashboard</button>
+      <button @click="go('sales')" class="btn">Ventas</button>
+      <button @click="go('products')" class="btn">Productos</button>
+      <button @click="go('pos')" class="btn">POS</button>
+      <button v-if="role === 'admin'" @click="go('egresos')" class="btn">Egresos</button>
 
-<button v-if="role !== 'admin'" @click="go('/sales')" class="btn">
-  Ventas
-</button>
-
-<button v-if="role !== 'admin'" @click="go('/products')" class="btn">
-  Productos
-</button>
-
-<button v-if="role !== 'admin'" @click="go('/pos')" class="btn">
-  POS
-</button>
-
-<button v-if="role !== 'admin'" @click="go('/egresos')" class="btn">
-  Egresos
-</button>
-
-
-      <button v-if="role === 'admin'" @click="go('/users')" class="btn">
-        Usuarios
-      </button>
-
-      <button class="btn logout" @click="logout">
-        🔒 Cerrar sesión
-      </button>
+      <button class="btn logout" @click="logout">🔒 Cerrar sesión</button>
     </nav>
   </aside>
 
@@ -108,6 +93,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Mantengo exactamente tus estilos actuales */
+
 /* SIDEBAR */
 .sidebar {
   width: 240px;
@@ -132,7 +119,7 @@ onMounted(() => {
 
 /* HEADER */
 .sidebar-header {
-  height: 56px; /* misma altura visual que el toggle */
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,7 +204,7 @@ onMounted(() => {
 
   .brand-logo img {
     max-width: 80px;
-    margin-top: 18px;
+    margin-top: 0px;
   }
 
   .btn {

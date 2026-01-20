@@ -3,7 +3,7 @@
     <div class="login-card">
       <!-- Logo arriba -->
       <div class="logo">
-        <img src="/logo.jpeg" alt="KioPOS Logo" />
+        <img src="/logo-blanco.png" alt="KioPOS Logo" />
       </div>
 
       <form @submit.prevent="login" class="login-form">
@@ -138,7 +138,7 @@ const login = async () => {
 }
 
 .logo img {
-  max-width: 90px;
+  max-width: 60%;
   height: auto;
   object-fit: contain;
 }

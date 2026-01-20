@@ -5,7 +5,6 @@ import Login from '../views/Login.vue';
 import DashboardLayout from '../layouts/DashboardLayout.vue';
 import Landing from '../views/Landing.vue';
 
-
 const routes = [
   {
     path: '/',
@@ -35,28 +34,34 @@ const routes = [
       },
       {
         path: 'sales',
+        name: 'sales',
         component: () => import('../views/Sales.vue'),
       },
       {
         path: 'products',
+        name: 'products',
         component: () => import('../views/Products.vue'),
       },
       {
         path: 'pos',
+        name: 'pos',
         component: () => import('../views/Salepos.vue'),
       },
       {
         path: 'users',
+        name: 'users',
         component: () => import('../views/AdminUsers.vue'),
         meta: { admin: true },
       },
       {
         path: 'egresos',
+        name: 'egresos',
         component: () => import('../views/Egresos.vue'),
         meta: { admin: true },
       },
       {
-        path: '/reset-password',
+        path: 'reset-password',
+        name: 'reset-password',
         component: () => import('../views/ResetPassword.vue'),
       },      
     ],
