@@ -3,15 +3,28 @@ import { supabase } from '../lib/supabase';
 
 import Login from '../views/Login.vue';
 import DashboardLayout from '../layouts/DashboardLayout.vue';
+import Landing from '../views/Landing.vue';
+
 
 const routes = [
+  {
+    path: '/',
+    name: 'landing',
+    component: Landing,
+    beforeEnter: async (to, from, next) => {
+      const { data } = await supabase.auth.getSession();
+      const isAuthenticated = !!data.session;
+      if (isAuthenticated) return next('/dashboard'); // ya logueado, va al dashboard
+      next(); // no logueado, muestra landing
+    },
+  },
   {
     path: '/login',
     name: 'login',
     component: Login,
   },
   {
-    path: '/',
+    path: '/dashboard',
     component: DashboardLayout,
     meta: { requiresAuth: true },
     children: [
