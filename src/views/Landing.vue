@@ -7,8 +7,8 @@
       </div>
 
       <nav :class="['nav-links', open ? 'open' : '']">
-        <a href="tel:+1234567890">📞 +1 234 567 890</a>
-        <a href="https://wa.me/1234567890" target="_blank">💬 WhatsApp</a>
+        <a href="tel:+51960173518">📞 +51960173518</a>
+        <a href="https://wa.me/51960173518" target="_blank">💬 WhatsApp</a>
         <router-link to="/cart">🛒 Carrito</router-link>
       </nav>
 
