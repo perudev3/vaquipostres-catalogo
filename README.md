@@ -1,6 +1,6 @@
-# 🧾 KioPOS – Sistema POS para Kioskos
+# 🧾 VAQUIPOSTRES - SISTEMA DE PEDIDOS
 
-KioPOS es un sistema **POS web moderno** desarrollado con **Vue 3 + Vite** y **Supabase**, pensado para kioskos y pequeños negocios que necesitan registrar ventas, productos y usuarios de forma simple, rápida y visual.
+VAQUIPOSTRES es un sistema **POS web moderno** desarrollado con **Vue 3 + Vite** y **Supabase**, pensado para kioskos y pequeños negocios que necesitan registrar ventas, productos y usuarios de forma simple, rápida y visual.
 
 Actualmente funciona **100% online**, con una interfaz optimizada para escritorio y dispositivos móviles.
 

@@ -9,6 +9,16 @@
       <nav :class="['nav-links', open ? 'open' : '']">
         <a href="tel:+51960173518">📞 +51960173518</a>
         <a href="https://wa.me/51960173518" target="_blank">💬 WhatsApp</a>
+
+        <!-- NUEVO: DESCARGA DE COTIZACIÓN -->
+        <a
+          href="/PROFORMA.pdf"
+          class="cotizacion-link"
+          target="_blank"
+        >
+          📄 Descargar cotización
+        </a>
+
         <router-link to="/cart">🛒 Carrito</router-link>
       </nav>
 
@@ -26,10 +36,14 @@
     <section class="products">
       <h2>Nuestros Productos</h2>
       <div class="product-grid">
-        <div v-for="product in products" :key="product.id" class="product-card">
+        <div
+          v-for="product in products"
+          :key="product.id"
+          class="product-card"
+        >
           <img :src="product.image" :alt="product.name" />
           <h3>{{ product.name }}</h3>
-          <p>{{ product.price | currency }}</p>
+          <p>{{ currency(product.price) }}</p>
           <button @click="addToCart(product)">🛒 Agregar al carrito</button>
         </div>
       </div>
@@ -52,7 +66,7 @@ const addToCart = (product) => {
   alert(`${product.name} agregado al carrito 🛒`);
 };
 
-const currency = (value) => `$${value.toFixed(2)}`;
+const currency = (value) => `S/ ${value.toFixed(2)}`;
 </script>
 
 <style scoped>
@@ -62,17 +76,17 @@ const currency = (value) => `$${value.toFixed(2)}`;
   color: #222;
   background: linear-gradient(to bottom, #fdf6f0, #f7e8d0);
   min-height: 100vh;
-  overflow-x: hidden; /* evita scroll horizontal */
+  overflow-x: hidden;
 }
 
-/* --- NAVBAR --- */
+/* --- NAVBAR (AJUSTADO A BRANDING VAQUI) --- */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: #1f3f7b;
-  color: #fff;
+  background: #9adbe8; /* celeste del branding */
+  color: #1f3f7b;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -80,7 +94,7 @@ const currency = (value) => `$${value.toFixed(2)}`;
 }
 
 .logo img {
-  height: 70px; /* logo más visible */
+  height: 70px;
   max-width: 180px;
 }
 
@@ -92,9 +106,9 @@ const currency = (value) => `$${value.toFixed(2)}`;
 
 .nav-links a,
 .nav-links router-link {
-  color: #fff;
+  color: #1f3f7b;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
@@ -104,9 +118,22 @@ const currency = (value) => `$${value.toFixed(2)}`;
   color: #25d366;
 }
 
+/* LINK COTIZACIÓN */
+.cotizacion-link {
+  background: #ffffff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.cotizacion-link:hover {
+  background: #1f3f7b;
+  color: #fff;
+}
+
 .nav-toggle {
   display: none;
-  background: #25d366;
+  background: #1f3f7b;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -205,13 +232,13 @@ const currency = (value) => `$${value.toFixed(2)}`;
     top: 70px;
     right: 0;
     flex-direction: column;
-    background: #1f3f7b;
+    background: #9adbe8;
     width: 220px;
     padding: 1rem;
     transform: translateX(100%);
     transition: transform 0.3s ease;
     height: calc(100vh - 70px);
-    overflow-y: auto; /* scroll interno del menú si hay muchos links */
+    overflow-y: auto;
   }
 
   .nav-links.open {
