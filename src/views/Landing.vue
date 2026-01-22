@@ -19,7 +19,13 @@
           📄 Descargar cotización
         </a>
 
-        <router-link to="/cart">🛒 Carrito</router-link>
+        <router-link to="/cart" class="cart-link">
+          🛒 Carrito
+          <span v-if="cartCount > 0" class="cart-badge">
+            {{ cartCount }}
+          </span>
+        </router-link>
+
       </nav>
 
       <!-- Toggle menú móvil -->
@@ -52,22 +58,83 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'
+import { supabase } from '@/supabase' // ajusta si tu ruta es distinta
+import Swal from 'sweetalert2'
 
-const open = ref(false);
 
-const products = ref([
-  { id: 1, name: 'Pastel de Chocolate', price: 15, image: '/products/pastel-choco.jpg' },
-  { id: 2, name: 'Cheesecake', price: 12, image: '/products/cheesecake.jpg' },
-  { id: 3, name: 'Cupcake Vainilla', price: 5, image: '/products/cupcake-vainilla.jpg' },
-]);
+const open = ref(false)
+
+// ===============================
+// PRODUCTOS DESDE SUPABASE
+// ===============================
+const products = ref([])
+
+const getProducts = async () => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('id')
+
+  if (error) {
+    console.error('Error cargando productos:', error)
+    return
+  }
+
+  // Normalizamos el producto para el carrito
+  products.value = data.map(p => ({
+    id: p.id,
+    name: p.name,
+    price: Number(p.price),
+    image: p.image_url,
+    max_toppings: p.max_toppings, // 👈 según carta
+    category: p.category,
+
+    // datos que se usarán luego en el carrito
+    quantity: 1,
+    toppings: [],
+    extra_toppings: 0
+  }))
+}
+
+// ===============================
+// CARRITO (localStorage)
+// ===============================
+const cart = ref(JSON.parse(localStorage.getItem('cart')) || [])
+
+import { computed } from 'vue'
+const cartCount = computed(() => cart.value.length)
+
+const saveCart = () => {
+  localStorage.setItem('cart', JSON.stringify(cart.value))
+}
 
 const addToCart = (product) => {
-  alert(`${product.name} agregado al carrito 🛒`);
-};
+  cart.value.push({
+    ...product,
+    toppings: [],
+    extra_toppings: 0
+  })
 
-const currency = (value) => `S/ ${value.toFixed(2)}`;
+  saveCart()
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Producto agregado',
+    text: `${product.name} se agregó al carrito 🛒`,
+    showConfirmButton: false,
+    timer: 1500
+  })
+}
+
+
+const currency = (value) => `S/ ${Number(value).toFixed(2)}`
+
+onMounted(() => {
+  getProducts()
+})
 </script>
+
 
 <style scoped>
 /* --- GLOBAL --- */
@@ -194,10 +261,13 @@ const currency = (value) => `S/ ${value.toFixed(2)}`;
 }
 
 .product-card img {
-  max-width: 100%;
+  width: 100%;
+  height: 180px;          /* altura controlada */
+  object-fit: cover;     /* recorte elegante */
   border-radius: 12px;
   margin-bottom: 0.8rem;
 }
+
 
 .product-card h3 {
   margin: 0.5rem 0;
@@ -229,7 +299,7 @@ const currency = (value) => `S/ ${value.toFixed(2)}`;
 @media (max-width: 768px) {
   .nav-links {
     position: fixed;
-    top: 70px;
+    top: 108px;
     right: 0;
     flex-direction: column;
     background: #9adbe8;
@@ -249,4 +319,22 @@ const currency = (value) => `S/ ${value.toFixed(2)}`;
     display: block;
   }
 }
+
+
+.cart-link {
+  position: relative;
+}
+
+.cart-badge {
+  background: #ff3b3b;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 999px;
+  padding: 2px 6px;
+  position: absolute;
+  top: -6px;
+  right: -10px;
+}
+
 </style>

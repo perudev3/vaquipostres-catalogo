@@ -23,6 +23,11 @@ const routes = [
     component: Login,
   },
   {
+    path: '/cart',
+    name: 'cart',
+    component: () => import('../views/Cart.vue'),
+  }, 
+  {
     path: '/dashboard',
     component: DashboardLayout,
     meta: { requiresAuth: true },
@@ -63,7 +68,8 @@ const routes = [
         path: 'reset-password',
         name: 'reset-password',
         component: () => import('../views/ResetPassword.vue'),
-      },      
+      },     
+      
     ],
   },
 ];
