@@ -53,23 +53,17 @@ const routes = [
         component: () => import('../views/Salepos.vue'),
       },
       {
-        path: 'users',
-        name: 'users',
-        component: () => import('../views/AdminUsers.vue'),
-        meta: { admin: true },
-      },
-      {
         path: 'egresos',
         name: 'egresos',
         component: () => import('../views/Egresos.vue'),
         meta: { admin: true },
       },
       {
-        path: 'reset-password',
-        name: 'reset-password',
-        component: () => import('../views/ResetPassword.vue'),
-      },     
-      
+        path: 'orders',
+        name: 'orders',
+        component: () => import('../views/Orders.vue'),
+        meta: { admin: true },
+      },
     ],
   },
 ];

@@ -83,7 +83,7 @@ onMounted(() => {
       <button @click="go('products')" class="btn">Productos</button>
       <button @click="go('pos')" class="btn">POS</button>
       <button v-if="role === 'admin'" @click="go('egresos')" class="btn">Egresos</button>
-
+      <button v-if="role === 'admin'" @click="go('orders')" class="btn">Pedidos</button>
       <button class="btn logout" @click="logout">🔒 Cerrar sesión</button>
     </nav>
   </aside>

@@ -90,8 +90,9 @@ watch(() => route.name, setModuleTitle, { immediate: true });
 /* Contenido del módulo scrollable */
 .module-body {
   flex: 1;
-  overflow-y: auto; /* Habilita scroll solo aquí */
-  padding: 20px;
+  overflow-y: auto;
+  padding: 0px;
   background: #f3f4f6;
+  margin-bottom: -60px;
 }
 </style>

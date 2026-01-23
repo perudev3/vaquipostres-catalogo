@@ -25,6 +25,14 @@
         <option v-for="s in syrups" :key="s" :value="s">{{ s }}</option>
       </select>
 
+      <!-- FRUTA -->
+      <h4>🍓 Fruta</h4>
+      <select v-model="item.fruit" @change="saveCart">
+        <option disabled value="">Selecciona fruta</option>
+        <option v-for="f in fruits" :key="f" :value="f">{{ f }}</option>
+      </select>
+
+
       <!-- TOPPINGS -->
       <div class="toppings">
         <label
@@ -124,6 +132,8 @@ const toppings = [
 ]
 
 const syrups = ['Chocolate','Dulce de leche','Maplle','Leche condensada']
+const fruits = ['Fresa', 'Durazno', 'Mango']
+
 
 const customer = ref({
   name: '',
@@ -221,7 +231,8 @@ const confirmOrder = async () => {
       price: i.price,
       toppings: i.toppings,
       extra_cost: extraCost(i),
-      syrup: i.syrup || null
+      syrup: i.syrup || null,
+      fruit: i.fruit || null
     })),
     total: total.value
   }
@@ -263,6 +274,9 @@ const confirmOrder = async () => {
     if (i.syrup) {
       receipt += `  Jarabe: ${i.syrup}%0A`
     }
+    if (i.fruit) {
+      receipt += `  Fruta: ${i.fruit}%0A`
+    }
     receipt += `  Subtotal: ${currency(itemTotal(i))}%0A`
   })
   receipt += `%0A💰 *Total: ${currency(total.value)}*`
@@ -286,15 +300,16 @@ const confirmOrder = async () => {
   location.reload()
 }
 
-
 const saveCart = () => {
   const plainCart = cart.value.map(i => ({
     ...i,
     toppings: i.toppings || [],
-    syrup: i.syrup || null
+    syrup: i.syrup || null,
+    fruit: i.fruit || null
   }))
   localStorage.setItem('cart', JSON.stringify(plainCart))
 }
+
 
 const toggleTopping = (item, topping) => {
   if (item.toppings.includes(topping)) {

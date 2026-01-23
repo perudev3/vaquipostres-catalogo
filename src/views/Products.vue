@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { supabase } from '../lib/supabase';
+import Swal from 'sweetalert2'
+
 
 /* =========================
    FORMULARIO (NO TOCADO)
@@ -31,7 +33,13 @@ const uploadImage = async () => {
     return null;
   }
 
-  const fileName = `${user.id}/product-${Date.now()}-${imageFile.value.name}`;
+const safeName = imageFile.value.name
+  .toLowerCase()
+  .replace(/\s+/g, '-')        // espacios → -
+  .replace(/[^\w.-]/g, '')    // elimina caracteres raros
+
+const fileName = `${user.id}/product-${Date.now()}-${safeName}`;
+
 
   const { data, error } = await supabase.storage
     .from('products')
@@ -124,11 +132,23 @@ const saveProduct = async () => {
     showModal.value = false;
 
     await loadProducts();
-    alert("¡Producto guardado exitosamente!");
+    Swal.fire({
+      icon: 'success',
+      title: 'Producto guardado',
+      text: '¡Producto guardado exitosamente!',
+      timer: 1500,
+      showConfirmButton: false
+    })
+
 
   } catch (err) {
     console.error(err);
-    alert("Error: " + err.message);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: err.message || 'Ocurrió un error al guardar el producto'
+    })
+
   }
 };
 
@@ -422,7 +442,7 @@ onMounted(loadProducts);
 }
 
 .preview-img {
-  width: 100%;
+  width: 50%;
   border-radius: 10px;
 }
 

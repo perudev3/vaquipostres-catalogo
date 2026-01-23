@@ -287,4 +287,6 @@ h1 {
   padding: 30px;
   color: #6b7280;
 }
+
+
 </style>

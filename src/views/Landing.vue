@@ -442,6 +442,7 @@ onMounted(() => {
 /* CARRITO */
 .cart-link {
   position: relative;
+  left: 40px;
 }
 
 .cart-badge {
@@ -455,4 +456,25 @@ onMounted(() => {
   top: -6px;
   right: -10px;
 }
+
+/* ICONO CARRITO MEJORADO */
+.cart-link {
+  font-size: 2.2rem;        /* 👈 más grande */
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.cart-link:hover {
+  transform: scale(1.15);
+}
+
+/* Ajuste badge para que no se vea chiquito */
+.cart-badge {
+  font-size: 0.7rem;
+  padding: 3px 7px;
+  top: -8px;
+  right: -12px;
+}
+
 </style>
