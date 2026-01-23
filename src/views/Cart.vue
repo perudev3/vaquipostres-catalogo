@@ -84,6 +84,7 @@
         <button @click="getLocation">Usar mi ubicación</button>
         <div id="map"></div>
         <p v-if="customer.address">Dirección detectada: {{ customer.address }}</p>
+        <p>*Costo de delivery a tratar por WhatsApp</p>
       </div>
 
       <h3>Tipo de pedido</h3>
