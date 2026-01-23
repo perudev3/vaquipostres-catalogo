@@ -18,15 +18,17 @@
         >
           📄 Descargar cotización
         </a>
-
-        <router-link to="/cart" class="cart-link">
-          🛒 Carrito
-          <span v-if="cartCount > 0" class="cart-badge">
-            {{ cartCount }}
-          </span>
-        </router-link>
-
       </nav>
+
+      <router-link
+        to="/cart"
+        class="cart-link cart-mobile"
+      >
+        🛒
+        <span v-if="cartCount > 0" class="cart-badge">
+          {{ cartCount }}
+        </span>
+      </router-link>
 
       <!-- Toggle menú móvil -->
       <button class="nav-toggle" @click="open = !open">☰</button>
@@ -39,6 +41,9 @@
         <img src="/logo-blanco.png" alt="Vaqui Postres Logo" />
       </div>
       <p>Mira nuestros productos y haz tu pedido por WhatsApp.</p>
+
+      <p><b>Horario de atención</b></p>
+      <p><strong>Lunes - Sábados : 2pm a 10pm</strong></p>
     </section>
 
     <!-- LISTADO DE PRODUCTOS -->
