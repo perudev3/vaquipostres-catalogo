@@ -122,7 +122,7 @@ const toppings = [
   'Burbujas de colores', 'Grajeas'
 ]
 
-const syrups = ['Chocolate','Fresa','Caramelo','Maracuyá','Miel']
+const syrups = ['Chocolate','Dulce de leche','Maplle','Leche condensada']
 
 const customer = ref({
   name: '',
@@ -304,11 +304,33 @@ const toggleTopping = (item, topping) => {
   saveCart()
 }
 
+
+const getMaxToppingsByName = (item) => {
+  const name = item.name.toUpperCase()
+
+  // CHEESECAKE
+  if (name.includes('CHEESECAKE')) {
+    if (name.includes('PEQUE')) return 1
+    if (name.includes('MEDIAN')) return 2
+    if (name.includes('GRANDE')) return 3
+  }
+
+  // VASOS
+  if (name.includes('10 ONZ')) return 2
+  if (name.includes('12 ONZ')) return 3
+  if (name.includes('14 ONZ')) return 4
+  if (name.includes('MEDIO LITRO')) return 5
+
+  return 0
+}
+
+
 const extraToppings = (item) => {
-  const max = Number(item.max_toppings || 0)
+  const max = getMaxToppingsByName(item)
   const selected = item.toppings?.length || 0
   return Math.max(0, selected - max)
 }
+
 
 const extraCost = (item) => {
   return Math.ceil(extraToppings(item) / 2) * 1
