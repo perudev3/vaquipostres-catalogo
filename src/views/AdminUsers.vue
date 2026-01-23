@@ -213,7 +213,7 @@ onMounted(loadUsers);
 </template>
 
 <style scoped>
-/* COLORES KioPOS */
+/* COLORES VAQUIPOSTRES */
 .users-page {
   padding: 16px;
   background: #f4f6fb;

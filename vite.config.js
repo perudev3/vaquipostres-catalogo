@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico'],
       manifest: {
-        name: 'Kiosko POS',
-        short_name: 'KioskoPOS',
-        description: 'Sistema de ventas y control de stock para kioskos',
+        name: 'VaquiPostres',
+        short_name: 'VaquiPostres',
+        description: 'Web de venta online de VaquiPostres',
         theme_color: '#4f46e5',
         background_color: '#ffffff',
         display: 'standalone',
