@@ -15,6 +15,8 @@
           href="/PROFORMA.pdf"
           class="cotizacion-link"
           target="_blank"
+          rel="noopener"
+          download
         >
           📄 Descargar cotización
         </a>
