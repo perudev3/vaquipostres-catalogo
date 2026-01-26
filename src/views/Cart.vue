@@ -13,6 +13,8 @@
       <p>No tienes productos aún</p>
     </div>
 
+    <div v-if="step === 1">
+
     <div v-for="(item, index) in cart" :key="index" class="cart-item">
       <h3>{{ item.name }}</h3>
       <p>Precio base: {{ currency(item.price) }}</p>
@@ -65,7 +67,17 @@
 
     <h2>Total: {{ currency(total) }}</h2>
 
-    <div class="checkout">
+    <!-- BOTÓN WIZARD -->
+    <div class="wizard-next">
+      <button class="next-step" @click="goToStep2">
+      👉 Continuar con mis datos
+      </button>
+    </div>
+
+    </div>
+
+    <div v-if="step === 2" class="checkout">
+
       <h3>Datos del cliente</h3>
 
       <input v-model="customer.name" placeholder="Nombre completo" />
@@ -107,6 +119,10 @@
         <input type="date" v-model="customer.order_date" />
       </div>
 
+      <button class="back-step" @click="goToStep1">
+        ← Volver a toppings
+      </button>
+
       <button class="confirm" @click="confirmOrder">
         ✅ Confirmar pedido
       </button>
@@ -115,13 +131,30 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { supabase } from '@/supabase'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Swal from 'sweetalert2'
 
 const cart = ref(JSON.parse(localStorage.getItem('cart')) || [])
+
+const step = ref(1)
+
+
+const goToStep2 = async () => {
+  step.value = 2
+  await nextTick()
+  document.querySelector('.checkout')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+const goToStep1 = async () => {
+  step.value = 1
+  await nextTick()
+  document.querySelector('.cart-item')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+
 
 const toppings = [
   'Chin chin', 'Gomitas', 'Oreo', 'Barquillo',
@@ -372,7 +405,9 @@ const currency = (v) => `S/ ${Number(v).toFixed(2)}`
 </script>
 
 <style scoped>
-/* tu CSS original intacto */
+/* =======================
+   CONTENEDOR GENERAL
+======================= */
 .cart {
   max-width: 900px;
   margin: auto;
@@ -380,6 +415,9 @@ const currency = (v) => `S/ ${Number(v).toFixed(2)}`
   color: #1f3f7b;
 }
 
+/* =======================
+   HEADER
+======================= */
 .cart-header {
   margin-bottom: 1rem;
 }
@@ -395,13 +433,48 @@ const currency = (v) => `S/ ${Number(v).toFixed(2)}`
   text-decoration: underline;
 }
 
+/* =======================
+   TÍTULOS
+======================= */
 .cart h1 {
   margin-bottom: 1.5rem;
+  text-align: center;
 }
 
-.cart h2,
+.cart h2 {
+  margin-top: 2rem;
+  text-align: center;
+}
+
 .cart h3 {
   color: #1f3f7b;
+  margin-top: 1.2rem;
+}
+
+/* =======================
+   PASO 1: PRODUCTOS
+======================= */
+.cart-item {
+  background: #ffffff;
+  padding: 1.4rem;
+  border-radius: 16px;
+  margin-bottom: 1.8rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  position: relative;
+  border-left: 6px solid #9adbe8;
+}
+
+.cart-item::before {
+  content: "Paso 1";
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: #9adbe8;
+  color: #1f3f7b;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 6px;
 }
 
 .cart p {
@@ -409,14 +482,9 @@ const currency = (v) => `S/ ${Number(v).toFixed(2)}`
   margin: 0.4rem 0;
 }
 
-.cart-item {
-  background: #fff;
-  padding: 1.2rem;
-  border-radius: 14px;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-}
-
+/* =======================
+   TOPPINGS
+======================= */
 .toppings {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -430,59 +498,219 @@ const currency = (v) => `S/ ${Number(v).toFixed(2)}`
   gap: 0.4rem;
   font-size: 0.85rem;
   background: #f6f8fc;
-  padding: 0.35rem 0.5rem;
-  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
   cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.toppings label:hover {
+  background: #e9f4fb;
 }
 
 .toppings input {
   cursor: pointer;
 }
 
+/* =======================
+   BOTÓN QUITAR
+======================= */
 .cart-item button {
   background: #ff6b6b;
   color: #fff;
   border: none;
-  padding: 0.45rem 0.9rem;
+  padding: 0.45rem 1rem;
   border-radius: 8px;
   cursor: pointer;
-  margin-top: 0.6rem;
+  margin-top: 0.8rem;
 }
 
 .cart-item button:hover {
   background: #e64949;
 }
 
+/* =======================
+   PASO 2: DATOS DEL CLIENTE
+======================= */
 .checkout {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 14px;
-  margin-top: 2rem;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  background: #ffffff;
+  padding: 1.8rem;
+  border-radius: 18px;
+  margin-top: 2.5rem;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+  border-left: 6px solid #ffd166;
+  position: relative;
+}
+
+.checkout::before {
+  content: "Paso 2";
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: #ffd166;
+  color: #1f3f7b;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 6px;
 }
 
 .checkout h3 {
-  margin-top: 1rem;
+  margin-top: 1.4rem;
 }
 
+/* =======================
+   INPUTS
+======================= */
 .checkout input,
 .checkout select {
   width: 100%;
-  padding: 0.6rem;
+  padding: 0.65rem;
   margin-top: 0.4rem;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ccc;
+  font-size: 0.9rem;
 }
 
+.checkout input:focus,
+.checkout select:focus {
+  outline: none;
+  border-color: #1f3f7b;
+}
+
+/* =======================
+   MAPA
+======================= */
+#map {
+  height: 220px;
+  border-radius: 12px;
+  margin-top: 0.6rem;
+  overflow: hidden;
+}
+
+/* =======================
+   PASO 3: CONFIRMAR
+======================= */
 .confirm {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   width: 100%;
-  background: #1f3f7b;
+  background: linear-gradient(135deg, #1f3f7b, #3f6fd1);
   color: white;
   border: none;
-  padding: 0.8rem;
-  border-radius: 10px;
+  padding: 1rem;
+  border-radius: 14px;
   font-weight: bold;
+  font-size: 1rem;
   cursor: pointer;
+  box-shadow: 0 10px 20px rgba(31,63,123,0.35);
 }
+
+.confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(31,63,123,0.45);
+}
+
+/* =======================
+   MOBILE
+======================= */
+@media (max-width: 600px) {
+  .cart {
+    padding: 1rem;
+  }
+
+  .cart-item,
+  .checkout {
+    padding: 1.2rem;
+  }
+}
+
+
+/* =======================
+   WIZARD FLOW
+======================= */
+
+.wizard-next {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.next-step {
+  background: linear-gradient(135deg, #00b4d8, #0077b6);
+  color: white;
+  border: none;
+  padding: 0.9rem 1.6rem;
+  border-radius: 14px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.next-step:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.2);
+}
+
+/* =======================
+   PASO VISUAL
+======================= */
+
+.cart-item {
+  border-left: 6px solid #4cc9f0;
+}
+
+.cart-item::before {
+  content: "Paso 1 · Personaliza tu producto";
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: #4cc9f0;
+  color: #003049;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+/* =======================
+   PASO 2
+======================= */
+
+.wizard-step {
+  border-left: 6px solid #ffd166;
+}
+
+.wizard-step::before {
+  content: "Paso 2 · Tus datos y entrega";
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: #ffd166;
+  color: #5a3e00;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+/* =======================
+   UX FLOW
+======================= */
+
+.checkout {
+  scroll-margin-top: 30px;
+}
+
+.back-step {
+  width: 100%;
+  background: #eee;
+  border: none;
+  padding: 0.7rem;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  margin-top: 30px;
+}
+
 </style>

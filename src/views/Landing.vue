@@ -65,7 +65,7 @@
       <img :src="product.image" :alt="product.name" />
       <h3>{{ product.name }}</h3>
       <p>{{ currency(product.price) }}</p>
-      <button @click="addToCart(product)">🛒 Agregar al carrito</button>
+      <button @click="addToCart(product)">🛒 Agregar </button>
     </div>
   </div>
 
@@ -312,17 +312,23 @@ onMounted(() => {
 
 /* TÍTULOS DE CATEGORÍA */
 .category-title {
-  margin: 3.5rem 0 1.5rem;
-  padding: 0.6rem 1.4rem;
+  margin: 4rem auto 2rem;
+  padding: 0.8rem 1.6rem;
   display: inline-block;
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 800;
   color: #1f3f7b;
   background: linear-gradient(135deg, #ffffff, #fcebd7);
   border-radius: 999px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  text-align: left;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  text-align: center;
 }
+
+.category-title + .product-grid {
+  padding-top: 1rem;
+  border-top: 2px dashed rgba(31, 63, 123, 0.15);
+}
+
 
 .category-title::after {
   content: '';
@@ -337,9 +343,12 @@ onMounted(() => {
 /* GRID */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.8rem;
-  margin-bottom: 2.5rem;
+  grid-template-columns: repeat(2, 1fr); /* 👈 2 por fila */
+  gap: 1rem;
+  margin-bottom: 3.5rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* TARJETA DE PRODUCTO */
@@ -361,7 +370,7 @@ onMounted(() => {
 
 /* IMAGEN */
 .product-card img {
-  width: 100%;
+  width: 70%;
   height: 190px;
   object-fit: cover;
   border-radius: 16px;
@@ -438,6 +447,10 @@ onMounted(() => {
 
   .category-title {
     text-align: center;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr; /* 👈 1 por fila en celular */
   }
 }
 
