@@ -23,17 +23,36 @@ const viewOrderDetails = (order) => {
   const itemsHtml = order.items
     .map(
       i => `
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-          <span>${i.name} x ${i.quantity || 1}</span>
-          <strong>S/ ${(i.price * (i.quantity || 1)).toFixed(2)}</strong>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between">
+            <strong>${i.name} x ${i.quantity || 1}</strong>
+            <strong>S/ ${(i.price * (i.quantity || 1)).toFixed(2)}</strong>
+          </div>
+
+          <div style="font-size:13px;color:#555;margin-left:8px">
+            ${i.fruit ? `<div>🍓 Fruta: ${i.fruit}</div>` : ''}
+            ${i.syrup ? `<div>🍫 Jarabe: ${i.syrup}</div>` : ''}
+
+            ${
+              Array.isArray(i.toppings) && i.toppings.length
+                ? `<div>➕ Toppings: ${i.toppings.join(', ')}</div>`
+                : ''
+            }
+
+            ${
+              i.extra_cost && i.extra_cost > 0
+                ? `<div>💰 Extra: S/ ${Number(i.extra_cost).toFixed(2)}</div>`
+                : ''
+            }
+          </div>
         </div>
       `
     )
     .join('')
 
-  // 🔹 Info extra: tipo de pedido y dirección
-  let extraInfo = `<p><strong>Tipo de pedido:</strong> ${order.order_type || '-'}</p>`
-  
+  // 🔹 Info extra: tipo de pedido y entrega
+  let extraInfo = `<p><strong>Tipo de pedido:</strong> ${order.order_type || 'Inmediato'}</p>`
+
   if (order.order_type === 'programado') {
     extraInfo += `<p><strong>Fecha programada:</strong> ${order.order_date || '-'}</p>`
   }
@@ -41,7 +60,7 @@ const viewOrderDetails = (order) => {
   if (order.delivery === 'delivery') {
     extraInfo += `<p><strong>Entrega:</strong> Delivery</p>`
     extraInfo += `<p><strong>Dirección:</strong> ${order.address || '-'}</p>`
-  } else if (order.delivery === 'recojo') {
+  } else {
     extraInfo += `<p><strong>Entrega:</strong> Recojo en tienda</p>`
   }
 
@@ -65,9 +84,6 @@ const viewOrderDetails = (order) => {
     confirmButtonColor: '#4f46e5'
   })
 }
-
-
-
 
 const loadOrders = async () => {
   loading.value = true
