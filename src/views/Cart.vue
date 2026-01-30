@@ -141,7 +141,46 @@ const cart = ref(JSON.parse(localStorage.getItem('cart')) || [])
 
 const step = ref(1)
 
+// ===============================
+// ARRAYS HARDCODEADOS (ya no se usan, pero se mantienen por compatibilidad visual)
+// ===============================
+const toppingsHardcoded = [
+  'Chin chin', 'Gomitas', 'Oreo', 'Barquillo',
+  'Coco', 'Maní', 'Wafer', 'Mashmelo',
+  'Doña pepa', 'Chispas chocolate',
+  'Chispas chocolate blanco',
+  'Burbujas de colores', 'Grajeas'
+]
 
+const syrupsHardcoded = ['Chocolate','Dulce de leche','Maplle','Leche condensada']
+const fruitsHardcoded = ['Fresa', 'Durazno', 'Mango']
+
+// ===============================
+// SUPPLIES DESDE SUPABASE
+// ===============================
+const toppings = ref([])
+const syrups = ref([])
+const fruits = ref([])
+
+const loadSupplies = async () => {
+  const { data, error } = await supabase
+    .from('supplies')
+    .select('name, type')
+    .eq('active', true)
+
+  if (error) {
+    console.error('Error cargando insumos:', error)
+    return
+  }
+
+  toppings.value = data.filter(i => i.type === 'topping').map(i => i.name)
+  syrups.value   = data.filter(i => i.type === 'jarabe').map(i => i.name)
+  fruits.value   = data.filter(i => i.type === 'fruta').map(i => i.name)
+}
+
+// ===============================
+// WIZARD PASOS
+// ===============================
 const goToStep2 = async () => {
   step.value = 2
   await nextTick()
@@ -154,20 +193,9 @@ const goToStep1 = async () => {
   document.querySelector('.cart-item')?.scrollIntoView({ behavior: 'smooth' })
 }
 
-
-
-const toppings = [
-  'Chin chin', 'Gomitas', 'Oreo', 'Barquillo',
-  'Coco', 'Maní', 'Wafer', 'Mashmelo',
-  'Doña pepa', 'Chispas chocolate',
-  'Chispas chocolate blanco',
-  'Burbujas de colores', 'Grajeas'
-]
-
-const syrups = ['Chocolate','Dulce de leche','Maplle','Leche condensada']
-const fruits = ['Fresa', 'Durazno', 'Mango']
-
-
+// ===============================
+// CLIENTE
+// ===============================
 const customer = ref({
   name: '',
   phone: '',
@@ -182,14 +210,74 @@ const customer = ref({
 
 let map, marker
 
-onMounted(() => {
-  // Mapa inicial solo si existe el div
+onMounted(async () => {
+  await loadSupplies()
+
   if (document.getElementById('map')) {
     map = L.map('map').setView([-12.0464, -77.0428], 13)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
   }
 })
 
+// ===============================
+// CART LOGIC
+// ===============================
+const saveCart = () => {
+  const plainCart = cart.value.map(i => ({
+    ...i,
+    toppings: i.toppings || [],
+    syrup: i.syrup || null,
+    fruit: i.fruit || null
+  }))
+  localStorage.setItem('cart', JSON.stringify(plainCart))
+}
+
+const toggleTopping = (item, topping) => {
+  if (item.toppings.includes(topping)) {
+    item.toppings = item.toppings.filter(t => t !== topping)
+  } else {
+    item.toppings.push(topping)
+  }
+  saveCart()
+}
+
+const getMaxToppingsByName = (item) => {
+  const name = item.name.toUpperCase()
+  if (name.includes('CHEESECAKE')) {
+    if (name.includes('PEQUE')) return 1
+    if (name.includes('MEDIAN')) return 2
+    if (name.includes('GRANDE')) return 3
+  }
+  if (name.includes('10 ONZ')) return 2
+  if (name.includes('12 ONZ')) return 3
+  if (name.includes('14 ONZ')) return 4
+  if (name.includes('MEDIO LITRO')) return 5
+  return 0
+}
+
+const extraToppings = (item) => {
+  const max = getMaxToppingsByName(item)
+  const selected = item.toppings?.length || 0
+  return Math.max(0, selected - max)
+}
+
+const extraCost = (item) => Math.ceil(extraToppings(item) / 2) * 1
+const itemTotal = (item) => Number(item.price || 0) + Number(extraCost(item) || 0)
+
+const total = computed(() =>
+  cart.value.reduce((sum, item) => sum + Number(itemTotal(item) || 0), 0)
+)
+
+const removeItem = (index) => {
+  cart.value.splice(index, 1)
+  saveCart()
+}
+
+const currency = (v) => `S/ ${Number(v).toFixed(2)}`
+
+// ===============================
+// MAP & GEOLOCATION
+// ===============================
 const getLocation = () => {
   navigator.geolocation.getCurrentPosition(async pos => {
     customer.value.latitude = pos.coords.latitude
@@ -204,7 +292,6 @@ const getLocation = () => {
     marker = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map)
     map.setView([pos.coords.latitude, pos.coords.longitude], 16)
 
-    // Obtener dirección usando reverse geocoding de OpenStreetMap Nominatim
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
@@ -226,7 +313,9 @@ const getLocation = () => {
   })
 }
 
-
+// ===============================
+// CONFIRM ORDER
+// ===============================
 const confirmOrder = async () => {
   if (
     !customer.value.name ||
@@ -284,7 +373,7 @@ const confirmOrder = async () => {
   }
 
   // ============================
-  // BOLETA PARA WHATSAPP
+  // BOLETA WHATSAPP
   // ============================
   let receipt = `🧾 *NUEVO PEDIDO*%0A%0A`
   receipt += `👤 Cliente: ${customer.value.name}%0A`
@@ -301,24 +390,15 @@ const confirmOrder = async () => {
   receipt += `%0A🛍 *Productos*%0A`
   cart.value.forEach(i => {
     receipt += `• ${i.name}%0A`
-    if (i.toppings.length) {
-      receipt += `  Toppings: ${i.toppings.join(', ')}%0A`
-    }
-    if (i.syrup) {
-      receipt += `  Jarabe: ${i.syrup}%0A`
-    }
-    if (i.fruit) {
-      receipt += `  Fruta: ${i.fruit}%0A`
-    }
+    if (i.toppings.length) receipt += `  Toppings: ${i.toppings.join(', ')}%0A`
+    if (i.syrup) receipt += `  Jarabe: ${i.syrup}%0A`
+    if (i.fruit) receipt += `  Fruta: ${i.fruit}%0A`
     receipt += `  Subtotal: ${currency(itemTotal(i))}%0A`
   })
   receipt += `%0A💰 *Total: ${currency(total.value)}*`
 
   if (customer.value.order_type === 'inmediato') {
-    window.open(
-      `https://wa.me/51960173518?text=${receipt}`,
-      '_blank'
-    )
+    window.open(`https://wa.me/51960173518?text=${receipt}`, '_blank')
   }
 
   cart.value = []
@@ -332,77 +412,8 @@ const confirmOrder = async () => {
   })
   location.reload()
 }
-
-const saveCart = () => {
-  const plainCart = cart.value.map(i => ({
-    ...i,
-    toppings: i.toppings || [],
-    syrup: i.syrup || null,
-    fruit: i.fruit || null
-  }))
-  localStorage.setItem('cart', JSON.stringify(plainCart))
-}
-
-
-const toggleTopping = (item, topping) => {
-  if (item.toppings.includes(topping)) {
-    item.toppings = item.toppings.filter(t => t !== topping)
-  } else {
-    item.toppings.push(topping)
-  }
-  saveCart()
-}
-
-
-const getMaxToppingsByName = (item) => {
-  const name = item.name.toUpperCase()
-
-  // CHEESECAKE
-  if (name.includes('CHEESECAKE')) {
-    if (name.includes('PEQUE')) return 1
-    if (name.includes('MEDIAN')) return 2
-    if (name.includes('GRANDE')) return 3
-  }
-
-  // VASOS
-  if (name.includes('10 ONZ')) return 2
-  if (name.includes('12 ONZ')) return 3
-  if (name.includes('14 ONZ')) return 4
-  if (name.includes('MEDIO LITRO')) return 5
-
-  return 0
-}
-
-
-const extraToppings = (item) => {
-  const max = getMaxToppingsByName(item)
-  const selected = item.toppings?.length || 0
-  return Math.max(0, selected - max)
-}
-
-
-const extraCost = (item) => {
-  return Math.ceil(extraToppings(item) / 2) * 1
-}
-
-const itemTotal = (item) => {
-  return Number(item.price || 0) + Number(extraCost(item) || 0)
-}
-
-const total = computed(() =>
-  cart.value.reduce((sum, item) => {
-    return sum + Number(itemTotal(item) || 0)
-  }, 0)
-)
-
-const removeItem = (index) => {
-  cart.value.splice(index, 1)
-  saveCart()
-}
-
-const currency = (v) => `S/ ${Number(v).toFixed(2)}`
-
 </script>
+
 
 <style scoped>
 /* =======================

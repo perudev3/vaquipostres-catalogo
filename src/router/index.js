@@ -64,6 +64,12 @@ const routes = [
         component: () => import('../views/Orders.vue'),
         meta: { admin: true },
       },
+      {
+        path: 'supplies',
+        name: 'supplies',
+        component: () => import('../views/SuppliesAdmin.vue'),
+        meta: { admin: true },
+      },
     ],
   },
 ];

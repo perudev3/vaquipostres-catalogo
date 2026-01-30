@@ -1,138 +1,156 @@
 <template>
-  <div class="landing-page">
+  <div class="landing">
+
     <!-- NAVBAR -->
     <header class="navbar">
-      <div class="logo">
-        <img src="/logo-blanco.png" alt="Vaqui Postres Logo" />
+      <div class="brand">
+        <img src="/logo-blanco.png" alt="Vaqui Postres" />
       </div>
 
-      <nav :class="['nav-links', open ? 'open' : '']">
-        <a href="tel:+51960173518">📞 +51960173518</a>
+      <nav :class="['nav', open ? 'open' : '']">
+        <a href="tel:+51960173518">📞 Llamar</a>
         <a href="https://wa.me/51960173518" target="_blank">💬 WhatsApp</a>
-
-        <!-- NUEVO: DESCARGA DE COTIZACIÓN -->
-        <a
-          href="/PROFORMA.pdf"
-          class="cotizacion-link"
-          target="_blank"
-          rel="noopener"
-          download
-        >
-          📄 Descargar cotización
-        </a>
+        <a href="/PROFORMA.pdf" target="_blank" class="quote">📄 Cotización</a>
       </nav>
 
-      <router-link
-        to="/cart"
-        class="cart-link cart-mobile"
-      >
+      <router-link to="/cart" class="cart">
         🛒
-        <span v-if="cartCount > 0" class="cart-badge">
-          {{ cartCount }}
-        </span>
+        <span v-if="cartCount">{{ cartCount }}</span>
       </router-link>
 
-      <!-- Toggle menú móvil -->
-      <button class="nav-toggle" @click="open = !open">☰</button>
+      <button class="menu" @click="open = !open">☰</button>
     </header>
 
     <!-- HERO -->
     <section class="hero">
-      <h1>Bienvenidos a Vaqui Postres </h1>
-      <div class="logo">
-        <img src="/logo-blanco.png" alt="Vaqui Postres Logo" />
-      </div>
-      <p>Mira nuestros productos y haz tu pedido por WhatsApp.</p>
+      <div class="hero-box">
+        <h1>Postres artesanales que enamoran 🤍</h1>
+        <p>Maracuyá · Lúcuma · Cheesecake premium</p>
 
-      <p><b>Horario de atención</b></p>
-      <p><strong>Lunes - Sábados : 2pm a 10pm</strong></p>
+        <button @click="scrollToProducts">Ver postres 🍰</button>
+
+        <small>⏰ Lun–Sáb · 2pm a 10pm</small>
+      </div>
     </section>
 
-    <!-- LISTADO DE PRODUCTOS -->
-    <section class="products">
-  <h2>Nuestros Productos</h2>
+    <!-- BENEFICIOS -->
+    <section class="benefits">
+      <div>🍰 Artesanales</div>
+      <div>🧡 Ingredientes frescos</div>
+      <div>🚀 Pedido rápido</div>
+      <div>✨ Presentación premium</div>
+    </section>
 
-  <!-- MARACULUCUMA -->
-  <h3 class="category-title">🥭🍮 Maraculúcuma</h3>
-  <div class="product-grid">
-    <div
-      v-for="product in products.filter(p =>
-        p.name.startsWith('MARACULUCUMA')
-      )"
-      :key="product.id"
-      class="product-card"
-    >
-      <img :src="product.image" :alt="product.name" />
-      <h3>{{ product.name }}</h3>
-      <p>{{ currency(product.price) }}</p>
-      <button @click="addToCart(product)">🛒 Agregar </button>
+    <!-- PRODUCTOS -->
+    <section class="products" ref="productsRef">
+
+      <div class="category">
+        <h2>🥭🍮 Maraculúcuma</h2>
+        <p>La combinación favorita de nuestros clientes</p>
+
+        <div class="grid">
+          <div
+            v-for="p in products.filter(p => p.name.startsWith('MARACULUCUMA'))"
+            :key="p.id"
+            class="card"
+          >
+            <img :src="p.image" @click="openPreview(p)" />
+            <h3>{{ p.name }}</h3>
+            <strong>{{ currency(p.price) }}</strong>
+            <button @click="addToCart(p)">Agregar 🛒</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category alt">
+        <h2>🥭 Maracumango</h2>
+        <p>Fresco, intenso y delicioso</p>
+
+        <div class="grid">
+          <div
+            v-for="p in products.filter(p => p.name.startsWith('MARACUMANGO'))"
+            :key="p.id"
+            class="card"
+          >
+            <img :src="p.image" @click="openPreview(p)" />
+            <h3>{{ p.name }}</h3>
+            <strong>{{ currency(p.price) }}</strong>
+            <button @click="addToCart(p)">Agregar 🛒</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category">
+        <h2>🍰 Cheesecake Maraculúcuma</h2>
+
+        <div class="grid">
+          <div
+            v-for="p in products.filter(p => p.name.startsWith('CHEESECAKE - MARACULUCUMA'))"
+            :key="p.id"
+            class="card"
+          >
+            <img :src="p.image" @click="openPreview(p)" />
+            <h3>{{ p.name }}</h3>
+            <strong>{{ currency(p.price) }}</strong>
+            <button @click="addToCart(p)">Agregar 🛒</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="category alt">
+        <h2>🍰 Cheesecake Maracumango</h2>
+
+        <div class="grid">
+          <div
+            v-for="p in products.filter(p => p.name.startsWith('CHEESECAKE - MARACUMANGO'))"
+            :key="p.id"
+            class="card"
+          >
+            <img :src="p.image" @click="openPreview(p)" />
+            <h3>{{ p.name }}</h3>
+            <strong>{{ currency(p.price) }}</strong>
+            <button @click="addToCart(p)">Agregar 🛒</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- PREVIEW -->
+    <div v-if="previewProduct" class="preview-overlay" @click.self="previewProduct = null">
+      <div class="preview-card">
+        <img :src="previewProduct.image" />
+        <h3>{{ previewProduct.name }}</h3>
+        <strong>{{ currency(previewProduct.price) }}</strong>
+        <button @click="addToCart(previewProduct)">Agregar 🛒</button>
+      </div>
     </div>
-  </div>
 
-  <!-- MARACUMANGO -->
-  <h3 class="category-title">🥭 Maracumango</h3>
-  <div class="product-grid">
-    <div
-      v-for="product in products.filter(p =>
-        p.name.startsWith('MARACUMANGO')
-      )"
-      :key="product.id"
-      class="product-card"
-    >
-      <img :src="product.image" :alt="product.name" />
-      <h3>{{ product.name }}</h3>
-      <p>{{ currency(product.price) }}</p>
-      <button @click="addToCart(product)">🛒 Agregar al carrito</button>
-    </div>
-  </div>
-
-  <!-- CHEESECAKE MARACULUCUMA -->
-  <h3 class="category-title">🍰 Cheesecake de Maraculúcuma</h3>
-  <div class="product-grid">
-    <div
-      v-for="product in products.filter(p =>
-        p.name.startsWith('CHEESECAKE - MARACULUCUMA')
-      )"
-      :key="product.id"
-      class="product-card"
-    >
-      <img :src="product.image" :alt="product.name" />
-      <h3>{{ product.name }}</h3>
-      <p>{{ currency(product.price) }}</p>
-      <button @click="addToCart(product)">🛒 Agregar al carrito</button>
-    </div>
-  </div>
-
-  <!-- CHEESECAKE MARACUMANGO -->
-  <h3 class="category-title">🍰 Cheesecake de Maracumango</h3>
-  <div class="product-grid">
-    <div
-      v-for="product in products.filter(p =>
-        p.name.startsWith('CHEESECAKE - MARACUMANGO')
-      )"
-      :key="product.id"
-      class="product-card"
-    >
-      <img :src="product.image" :alt="product.name" />
-      <h3>{{ product.name }}</h3>
-      <p>{{ currency(product.price) }}</p>
-      <button @click="addToCart(product)">🛒 Agregar al carrito</button>
-    </div>
-  </div>
-
-</section>
-
+    <!-- FOOTER -->
+    <footer class="footer">
+      <h3>¿Antojo de algo dulce? 🍮</h3>
+      <a href="https://wa.me/51960173518" target="_blank">
+        Escríbenos por WhatsApp 💬
+      </a>
+    </footer>
 
   </div>
 </template>
 
+
+
 <script setup>
-import { ref, onMounted } from 'vue'
-import { supabase } from '@/supabase' // ajusta si tu ruta es distinta
+import { ref, onMounted, computed } from 'vue'
+import { supabase } from '@/supabase'
 import Swal from 'sweetalert2'
 
-
 const open = ref(false)
+const previewProduct = ref(null)
+
+const openPreview = (product) => {
+  previewProduct.value = product
+}
+
 
 // ===============================
 // PRODUCTOS DESDE SUPABASE
@@ -171,7 +189,6 @@ const getProducts = async () => {
 // ===============================
 const cart = ref(JSON.parse(localStorage.getItem('cart')) || [])
 
-import { computed } from 'vue'
 const cartCount = computed(() => cart.value.length)
 
 const saveCart = () => {
@@ -206,290 +223,292 @@ onMounted(() => {
 
 
 <style scoped>
-/* --- GLOBAL --- */
-.landing-page {
+.landing {
   font-family: 'Poppins', sans-serif;
-  color: #222;
-  background: linear-gradient(to bottom, #fdf6f0, #f7e8d0);
-  min-height: 100vh;
-  overflow-x: hidden;
+  background: #fff;
+  color: #1f3f7b;
 }
 
-/* --- NAVBAR (AJUSTADO A BRANDING VAQUI) --- */
+/* NAVBAR */
 .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: #9adbe8;
-  color: #1f3f7b;
-  position: fixed;   /* 👈 CLAVE */
+  position: fixed;
   top: 0;
-  left: 0;
   width: 100%;
+  background: #9adbe8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.5rem;
   z-index: 1000;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.logo img {
-  height: 100px;
-  max-width: 180px;
+.brand img {
+  height: 70px;
 }
 
-.nav-links {
+.nav {
   display: flex;
-  gap: 1.2rem;
   align-items: center;
+  gap: 0.8rem;
 }
 
-.nav-links a,
-.nav-links router-link {
-  color: #1f3f7b;
+
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
   text-decoration: none;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  color: #1f3f7b;
+  background: rgba(255,255,255,0.35);
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
 }
 
-.nav-links a:hover,
-.nav-links router-link:hover {
-  color: #25d366;
-}
 
-/* LINK COTIZACIÓN */
-.cotizacion-link {
+.nav a:hover {
   background: #ffffff;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  font-weight: 600;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
-.cotizacion-link:hover {
+
+.nav .quote {
   background: #1f3f7b;
-  color: #fff;
-}
-
-.nav-toggle {
-  display: none;
-  background: #1f3f7b;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
-
-/* --- HERO --- */
-.hero {
-  text-align: center;
-  padding: 4rem 1rem;
-  color: #1f3f7b;
-  margin-top: 95px;
-}
-
-.hero h1 {
-  font-size: 2.8rem;
-  margin-bottom: 1rem;
-}
-
-.hero p {
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
-}
-
-/* --- PRODUCTOS --- */
-.products {
-  padding: 3rem 1rem;
-  text-align: center;
-}
-
-.products h2 {
-  font-size: 2rem;
-  color: #1f3f7b;
-  margin-bottom: 2rem;
-}
-
-/* TÍTULOS DE CATEGORÍA */
-.category-title {
-  margin: 4rem auto 2rem;
-  padding: 0.8rem 1.6rem;
-  display: inline-block;
-  font-size: 1.7rem;
-  font-weight: 800;
-  color: #1f3f7b;
-  background: linear-gradient(135deg, #ffffff, #fcebd7);
-  border-radius: 999px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-  text-align: center;
-}
-
-.category-title + .product-grid {
-  padding-top: 1rem;
-  border-top: 2px dashed rgba(31, 63, 123, 0.15);
-}
-
-
-.category-title::after {
-  content: '';
-  display: block;
-  height: 3px;
-  width: 60px;
-  background: linear-gradient(to right, #25d366, #9adbe8);
-  border-radius: 999px;
-  margin-top: 6px;
-}
-
-/* GRID */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 👈 2 por fila */
-  gap: 1rem;
-  margin-bottom: 3.5rem;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* TARJETA DE PRODUCTO */
-.product-card {
-  background: linear-gradient(to bottom, #ffffff, #fff7ee);
-  border-radius: 20px;
-  padding: 1.2rem;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 14px 28px rgba(0,0,0,0.18);
-}
-
-/* IMAGEN */
-.product-card img {
-  width: 70%;
-  height: 190px;
-  object-fit: cover;
-  border-radius: 16px;
-  margin-bottom: 0.8rem;
-  transition: transform 0.4s ease;
-}
-
-.product-card:hover img {
-  transform: scale(1.05);
-}
-
-/* NOMBRE */
-.product-card h3 {
-  margin: 0.6rem 0;
-  font-size: 1.15rem;
+  color: #ffffff;
   font-weight: 700;
-  color: #1f3f7b;
-  text-align: center;
 }
 
-/* PRECIO */
-.product-card p {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #25a15a;
-  margin-bottom: 0.8rem;
+.nav .quote:hover {
+  background: #163166;
 }
 
-/* BOTÓN */
-.product-card button {
-  margin-top: auto;
-  width: 100%;
-  background: linear-gradient(135deg, #25d366, #1fa855);
-  color: white;
-  border: none;
-  padding: 0.7rem;
-  border-radius: 999px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.95rem;
-  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
 
-.product-card button:hover {
-  background: linear-gradient(135deg, #1fa855, #128c7e);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(18, 140, 126, 0.5);
-}
-
-/* --- RESPONSIVE --- */
 @media (max-width: 768px) {
-  .nav-links {
+  .nav {
     position: fixed;
-    top: 108px;
+    top: 100px;
     right: 0;
     flex-direction: column;
-    background: #9adbe8;
+    align-items: stretch;
     width: 220px;
     padding: 1rem;
+    background: #9adbe8;
+    border-radius: 20px 0 0 20px;
     transform: translateX(100%);
     transition: transform 0.3s ease;
-    height: calc(100vh - 70px);
-    overflow-y: auto;
+    box-shadow: -6px 0 20px rgba(0,0,0,0.2);
+    z-index: 999;
   }
 
-  .nav-links.open {
+  .nav.open {
     transform: translateX(0);
   }
 
-  .nav-toggle {
+  .nav a {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+
+.menu {
+  display: none;
+}
+
+/* HERO */
+.hero {
+  margin-top: 90px;
+  height: 75vh;
+  background: linear-gradient(
+    rgba(255,255,255,0.8),
+    rgba(255,255,255,0.9)
+  ),
+  url('/hero-postre.jpg') center/cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-box {
+  text-align: center;
+  max-width: 500px;
+}
+
+.hero-box h1 {
+  font-size: 2.6rem;
+}
+
+.hero-box button {
+  margin: 1rem 0;
+  padding: 0.8rem 2rem;
+  border-radius: 999px;
+  border: none;
+  background: #25d366;
+  color: white;
+  font-weight: 700;
+}
+
+/* BENEFICIOS */
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  text-align: center;
+  padding: 2rem;
+  background: #f9f9f9;
+}
+
+/* PRODUCTOS */
+.products {
+  padding: 4rem 1rem;
+}
+
+.category {
+  margin-bottom: 4rem;
+}
+
+.category.alt {
+  background: #fdf6f0;
+  padding: 2.5rem 1rem;
+  border-radius: 30px;
+}
+
+.category h2 {
+  text-align: center;
+  font-size: 1.8rem;
+}
+
+.category p {
+  text-align: center;
+  opacity: 0.8;
+  font-size: 0.95rem;
+}
+
+/* 👇 AQUÍ ESTÁ LA CLAVE */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1.8rem;
+}
+
+/* TARJETA MÁS PEQUEÑA */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 0.7rem;
+  text-align: center;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+/* IMAGEN MÁS BAJA */
+.card img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* TEXTO MÁS COMPACTO */
+.card h3 {
+  font-size: 0.85rem;
+  margin: 0.4rem 0;
+  line-height: 1.2;
+  color: #2c2c2c;
+}
+
+.card strong {
+  font-size: 0.9rem;
+  color: #1f3f7b;
+}
+
+/* BOTÓN MÁS COMPACTO */
+.card button {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.45rem;
+  border-radius: 999px;
+  border: none;
+  background: #1fa855;
+  color: white;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+/* FOOTER */
+.footer {
+  background: #1f3f7b;
+  color: white;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.footer a {
+  display: inline-block;
+  margin-top: 1rem;
+  background: #25d366;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .nav {
+    position: fixed;
+    right: 0;
+    top: 80px;
+    flex-direction: column;
+    background: #9adbe8;
+    width: 200px;
+    transform: translateX(100%);
+  }
+
+  .nav.open {
+    transform: translateX(0);
+  }
+
+  .menu {
     display: block;
   }
 
-  .category-title {
-    text-align: center;
+  .benefits {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .product-grid {
-    grid-template-columns: 1fr; /* 👈 1 por fila en celular */
+  /* MÁS PRODUCTOS EN CELULAR */
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* CARRITO */
-.cart-link {
-  position: relative;
-  left: 40px;
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
 }
 
-.cart-badge {
-  background: #ff3b3b;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: bold;
-  border-radius: 999px;
-  padding: 2px 6px;
-  position: absolute;
-  top: -6px;
-  right: -10px;
+.preview-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.2rem;
+  width: 320px;
+  max-width: 90%;
+  text-align: center;
 }
 
-/* ICONO CARRITO MEJORADO */
-.cart-link {
-  font-size: 2.2rem;        /* 👈 más grande */
-  line-height: 1;
-  cursor: pointer;
-  transition: transform 0.2s ease;
+.preview-card img {
+  width: 100%;
+  border-radius: 16px;
+  margin-bottom: 1rem;
 }
-
-.cart-link:hover {
-  transform: scale(1.15);
-}
-
-/* Ajuste badge para que no se vea chiquito */
-.cart-badge {
-  font-size: 0.7rem;
-  padding: 3px 7px;
-  top: -8px;
-  right: -12px;
-}
-
 </style>
