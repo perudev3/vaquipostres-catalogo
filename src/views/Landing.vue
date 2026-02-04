@@ -241,9 +241,7 @@ const addToCart = (product) => {
 
 const applyPromo2x1 = () => {
   const today = new Date().getDay() // 4 = jueves
-
-  // simulando hoy (miércoles = 3)
-  if (today !== 3) {
+  if (today !== 4) {
     Swal.fire(
       'Promo no disponible',
       'La promoción 2x1 solo aplica los jueves',
