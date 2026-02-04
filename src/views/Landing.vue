@@ -98,6 +98,13 @@
         </div>
       </div>
 
+      <!-- PROMO MITAD MARACUMANGOS -->
+      <div class="promo-banner" @click="applyComboRomantico">
+        <img src="/combo_romantico.png" alt="Combo Romántico">
+      </div>
+
+
+
       <div class="category">
         <h2>🍰 Cheesecake Maraculúcuma</h2>
 
@@ -291,7 +298,116 @@ const applyPromo2x1 = () => {
 }
 
 
+const isValentinePromoActive = () => {
+  const today = new Date()
+
+  const year = today.getFullYear()
+
+  const start = new Date(year, 1, 12) // Febrero = 1
+  start.setHours(0, 0, 0, 0)
+
+  const end = new Date(year, 1, 14)
+  end.setHours(23, 59, 59, 999)
+
+  return today >= start && today <= end
+}
+
+const applyComboRomantico = () => {
+
+  if (!isValentinePromoActive()) {
+    Swal.fire(
+      'Promo no disponible 💔',
+      'El Combo Romántico solo está disponible del 12 al 14 de febrero',
+      'info'
+    )
+    return
+  }
+
+  const maracumango850 = products.value.find(p =>
+    p.name.toUpperCase().startsWith('MARACUMANGO') &&
+    Math.abs(p.price - 8.5) < 0.01
+  )
+
+  const maraculucuma1050 = products.value.find(p =>
+    p.name.toUpperCase().startsWith('MARACULUCUMA') &&
+    Math.abs(p.price - 10.5) < 0.01
+  )
+
+  if (!maracumango850 || !maraculucuma1050) {
+    Swal.fire(
+      'Error',
+      'No se encontraron los productos del Combo Romántico',
+      'error'
+    )
+    return
+  }
+
+  addToCart({ ...maracumango850, promo: 'COMBO_ROMANTICO' })
+  addToCart({ ...maracumango850, promo: 'COMBO_ROMANTICO' })
+  addToCart({ ...maraculucuma1050, promo: 'COMBO_ROMANTICO' })
+
+  localStorage.setItem('comboRomantico', 'true')
+
+  Swal.fire({
+    icon: 'success',
+    title: '💕 Combo Romántico aplicado',
+    text: '2 Maracumangos + 1 Maraculúcuma por S/ 25.00',
+    timer: 1600,
+    showConfirmButton: false
+  })
+
+  setTimeout(() => {
+    window.location.href = '/cart'
+  }, 1200)
+}
+
+
+
 const currency = (value) => `S/ ${Number(value).toFixed(2)}`
+
+const applyPromoHalfMaracumango = () => {
+
+  // 1. Filtrar solo maracumangos
+  const maracumangos = products.value.filter(p =>
+    p.name.toUpperCase().startsWith('MARACUMANGO')
+  )
+
+  if (maracumangos.length === 0) {
+    Swal.fire('Error', 'No hay Maracumangos disponibles', 'warning')
+    return
+  }
+
+  // 2. Ordenarlos por precio (más baratos primero)
+  const sorted = [...maracumangos].sort((a, b) => a.price - b.price)
+
+  // 3. Tomar solo la mitad
+  const mitad = Math.ceil(sorted.length / 2)
+  const promoList = sorted.slice(0, mitad)
+
+  // 4. Elegimos uno (el más barato de la promo)
+  const promoProduct = promoList[0]
+
+  // 5. Agregar al carrito con marca de promo
+  addToCart({
+    ...promoProduct,
+    promo: 'MITAD_MARACUMANGO'
+  })
+
+  localStorage.setItem('promo_half_maracumango', 'true')
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Promo aplicada 🥭',
+    text: `Maracumango seleccionado en promoción`,
+    timer: 1600,
+    showConfirmButton: false
+  })
+
+  setTimeout(() => {
+    window.location.href = '/cart'
+  }, 1200)
+}
+
 
 onMounted(() => {
   getProducts()

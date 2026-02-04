@@ -16,6 +16,16 @@
       🎉 Promo Jueves 2x1 aplicada
     </p>
 
+    <p
+      v-if="hasComboRomantico"
+      style="color:#e63946;font-weight:bold;text-align:center; margin: 30px;"
+    >
+      💕 Combo Romántico aplicado  
+      <br />
+      2 Maracumangos + 1 Maraculúcuma → S/ 25.00
+    </p>
+
+
 
 
     <div v-if="cart.length === 0">
@@ -164,6 +174,32 @@ const toppingsHardcoded = [
 const syrupsHardcoded = ['Chocolate','Dulce de leche','Maplle','Leche condensada']
 const fruitsHardcoded = ['Fresa', 'Durazno', 'Mango']
 
+const comboRomantico = computed(() => {
+  const maracumangos = cart.value.filter(
+    p =>
+      p.name.toUpperCase().startsWith('MARACUMANGO') &&
+      Number(p.price) === 8.50
+  )
+
+  const maraculucumas = cart.value.filter(
+    p =>
+      p.name.toUpperCase().startsWith('MARACULUCUMA') &&
+      Number(p.price) === 10.50
+  )
+
+  return {
+    maracumangosQty: maracumangos.reduce((s, p) => s + p.quantity, 0),
+    maraculucumasQty: maraculucumas.reduce((s, p) => s + p.quantity, 0)
+  }
+})
+
+
+const hasComboRomantico = computed(() =>
+  comboRomantico.value.maracumangosQty >= 2 &&
+  comboRomantico.value.maraculucumasQty >= 1
+)
+
+
 // ===============================
 // SUPPLIES DESDE SUPABASE
 // ===============================
@@ -280,30 +316,66 @@ const hasPromo2x1 = computed(() => {
 const total = computed(() => {
   let sum = 0
 
-  // productos promo 2x1
-  const promoItems = cart.value.filter(
+  // =========================
+  // PROMO JUEVES 2X1
+  // =========================
+  const promo2x1Items = cart.value.filter(
     i => i.promo === 'JUEVES_2X1'
   )
 
-  // si hay promo válida (exactamente 2)
-  if (promoItems.length === 2) {
+  if (promo2x1Items.length === 2) {
     sum += 19.90
   }
 
-  // productos normales (no promo)
-  const normalItems = cart.value.filter(
-    i => i.promo !== 'JUEVES_2X1'
-  )
+  // =========================
+  // COMBO ROMÁNTICO
+  // =========================
+  const remaining = cart.value.map(i => ({ ...i }))
 
-  sum += normalItems.reduce(
-    (acc, item) => acc + itemTotal(item),
-    0
-  )
+  if (hasComboRomantico.value) {
+    // precio fijo del combo
+    sum += 25
+
+    // quitar 2 maracumangos 8.50
+    let mg = 2
+    for (const item of remaining) {
+      if (
+        item.name.toUpperCase().startsWith('MARACUMANGO') &&
+        item.price === 8.50 &&
+        mg > 0
+      ) {
+        const used = Math.min(item.quantity, mg)
+        item.quantity -= used
+        mg -= used
+      }
+    }
+
+    // quitar 1 maraculucuma 10.50
+    let ml = 1
+    for (const item of remaining) {
+      if (
+        item.name.toUpperCase().startsWith('MARACULUCUMA') &&
+        item.price === 10.50 &&
+        ml > 0
+      ) {
+        const used = Math.min(item.quantity, ml)
+        item.quantity -= used
+        ml -= used
+      }
+    }
+  }
+
+  // =========================
+  // RESTO DE PRODUCTOS
+  // =========================
+  remaining.forEach(item => {
+    if (item.quantity > 0 && item.promo !== 'JUEVES_2X1') {
+      sum += itemTotal(item) * item.quantity
+    }
+  })
 
   return sum
 })
-
-
 
 const removeItem = (index) => {
   cart.value.splice(index, 1)
@@ -426,6 +498,13 @@ const confirmOrder = async () => {
     receipt += `🔥 Jueves 2x1 Maracumango%0A`
     receipt += `💰 Precio promo: S/ 19.90%0A`
   }
+
+  if (hasComboRomantico.value) {
+    receipt += `%0A💕 *COMBO ROMÁNTICO APLICADO*%0A`
+    receipt += `2 Maracumangos + 1 Maraculúcuma%0A`
+    receipt += `💰 Precio promo: S/ 25.00%0A`
+  }
+
 
   if (customer.value.order_type === 'programado') {
     receipt += `📅 Fecha: ${customer.value.order_date}%0A`
