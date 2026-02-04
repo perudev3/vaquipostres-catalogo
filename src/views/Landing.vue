@@ -24,8 +24,16 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-box">
+
+        <!-- LOGO -->
+        <img
+          src="/logo-blanco.png"
+          alt="Vaqui Postres"
+          class="hero-logo"
+        />
+
         <h1>Postres artesanales que enamoran 🤍</h1>
-        <p>Maracuyá · Lúcuma · Cheesecake premium</p>
+        <p>MaracuMango · MaracuLúcuma · Cheesecake premium</p>
 
         <button @click="scrollToProducts">Ver postres 🍰</button>
 
@@ -33,13 +41,23 @@
       </div>
     </section>
 
-    <!-- BENEFICIOS -->
-    <section class="benefits">
+
+    
+  <!-- BENEFICIOS + PROMO -->
+  <section class="benefits">
+
+   <!-- PROMO JUEVES 2x1 -->
+      <div class="promo-banner" @click="applyPromo2x1">
+        <img src="/Jueves_2x1.png" alt="Jueves 2x1 Maracumango">
+      </div>
+
+      <!-- BENEFICIOS -->
       <div>🍰 Artesanales</div>
       <div>🧡 Ingredientes frescos</div>
       <div>🚀 Pedido rápido</div>
       <div>✨ Presentación premium</div>
-    </section>
+
+  </section>
 
     <!-- PRODUCTOS -->
     <section class="products" ref="productsRef">
@@ -146,11 +164,19 @@ import Swal from 'sweetalert2'
 
 const open = ref(false)
 const previewProduct = ref(null)
+const productsRef = ref(null)
+const isThursdayPromo = ref(false)
+
 
 const openPreview = (product) => {
   previewProduct.value = product
 }
 
+const scrollToProducts = () => {
+  productsRef.value?.scrollIntoView({
+    behavior: 'smooth'
+  })
+}
 
 // ===============================
 // PRODUCTOS DESDE SUPABASE
@@ -211,6 +237,59 @@ const addToCart = (product) => {
     showConfirmButton: false,
     timer: 1500
   })
+}
+
+const applyPromo2x1 = () => {
+  const today = new Date().getDay() // 4 = jueves
+
+  // simulando hoy (miércoles = 3)
+  if (today !== 3) {
+    Swal.fire(
+      'Promo no disponible',
+      'La promoción 2x1 solo aplica los jueves',
+      'info'
+    )
+    return
+  }
+
+  const maracumango1050 = products.value.find(p =>
+    p.name.toUpperCase().includes('MARACUMANGO') &&
+    p.name.includes('12 ONZ') &&
+    Math.abs(Number(p.price) - 10.5) < 0.01
+  )
+
+  if (!maracumango1050) {
+    Swal.fire(
+      'Error',
+      'No se encontró el Maracumango de 12 ONZ',
+      'warning'
+    )
+    return
+  }
+
+    addToCart({
+      ...maracumango1050,
+      promo: 'JUEVES_2X1'
+    })
+
+    addToCart({
+      ...maracumango1050,
+      promo: 'JUEVES_2X1'
+    })
+
+    localStorage.setItem('promo2x1', 'true')
+
+  Swal.fire({
+    icon: 'success',
+    title: 'Promo aplicada 🎉',
+    text: '2 Maracumangos de 12 ONZ por S/ 19.90',
+    timer: 1500,
+    showConfirmButton: false
+  })
+
+  setTimeout(() => {
+    window.location.href = '/cart'
+  }, 1200)
 }
 
 
@@ -333,6 +412,14 @@ onMounted(() => {
   align-items: center;
 }
 
+.hero-logo {
+  width: 140px;
+  max-width: 70%;
+  margin: 0 auto 1rem;
+  display: block;
+}
+
+
 .hero-box {
   text-align: center;
   max-width: 500px;
@@ -357,7 +444,6 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(4,1fr);
   text-align: center;
-  padding: 2rem;
   background: #f9f9f9;
 }
 
@@ -506,9 +592,32 @@ onMounted(() => {
   text-align: center;
 }
 
-.preview-card img {
+.preview-card img{
   width: 100%;
-  border-radius: 16px;
-  margin-bottom: 1rem;
 }
+
+.preview-card button{
+  border-bottom: 1px solid black;
+}
+/* PROMO BANNER */
+.promo-banner {
+  grid-column: 1 / -1;
+  margin-bottom: 1.2rem;
+  cursor: pointer;
+}
+
+.promo-banner img {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: block;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transition: transform 0.25s ease;
+}
+
+.promo-banner img:hover {
+  transform: scale(1.02);
+}
+
 </style>

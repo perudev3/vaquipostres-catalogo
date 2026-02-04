@@ -9,6 +9,15 @@
 
     <h1>🛒 Tu carrito</h1>
 
+    <p
+      v-if="hasPromo2x1"
+      style="color:#1fa855;font-weight:bold;text-align:center; margin: 30px;"
+    >
+      🎉 Promo Jueves 2x1 aplicada
+    </p>
+
+
+
     <div v-if="cart.length === 0">
       <p>No tienes productos aún</p>
     </div>
@@ -264,9 +273,37 @@ const extraToppings = (item) => {
 const extraCost = (item) => Math.ceil(extraToppings(item) / 2) * 1
 const itemTotal = (item) => Number(item.price || 0) + Number(extraCost(item) || 0)
 
-const total = computed(() =>
-  cart.value.reduce((sum, item) => sum + Number(itemTotal(item) || 0), 0)
-)
+const hasPromo2x1 = computed(() => {
+  return cart.value.filter(i => i.promo === 'JUEVES_2X1').length === 2
+})
+
+const total = computed(() => {
+  let sum = 0
+
+  // productos promo 2x1
+  const promoItems = cart.value.filter(
+    i => i.promo === 'JUEVES_2X1'
+  )
+
+  // si hay promo válida (exactamente 2)
+  if (promoItems.length === 2) {
+    sum += 19.90
+  }
+
+  // productos normales (no promo)
+  const normalItems = cart.value.filter(
+    i => i.promo !== 'JUEVES_2X1'
+  )
+
+  sum += normalItems.reduce(
+    (acc, item) => acc + itemTotal(item),
+    0
+  )
+
+  return sum
+})
+
+
 
 const removeItem = (index) => {
   cart.value.splice(index, 1)
@@ -375,12 +412,21 @@ const confirmOrder = async () => {
   // ============================
   // BOLETA WHATSAPP
   // ============================
+  const promo2x1Applied =
+  cart.value.filter(i => i.promo === 'JUEVES_2X1').length === 2
+
   let receipt = `🧾 *NUEVO PEDIDO*%0A%0A`
   receipt += `👤 Cliente: ${customer.value.name}%0A`
   receipt += `📞 Celular: ${customer.value.phone}%0A`
   receipt += `💳 Pago: ${customer.value.payment}%0A`
   receipt += `🚚 Entrega: ${customer.value.delivery}%0A`
   receipt += `⏱ Tipo: ${customer.value.order_type}%0A`
+  if (promo2x1Applied) {
+    receipt += `%0A🎉 *PROMOCIÓN APLICADA*%0A`
+    receipt += `🔥 Jueves 2x1 Maracumango%0A`
+    receipt += `💰 Precio promo: S/ 19.90%0A`
+  }
+
   if (customer.value.order_type === 'programado') {
     receipt += `📅 Fecha: ${customer.value.order_date}%0A`
   }
