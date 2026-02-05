@@ -49,7 +49,12 @@
    <!-- PROMO JUEVES 2x1 -->
       <div class="promo-banner" @click="applyPromo2x1">
         <img src="/Jueves_2x1.png" alt="Jueves 2x1 Maracumango">
+
+        <button class="promo-btn">
+          👉 Quiero la promoción
+        </button>
       </div>
+
 
       <!-- BENEFICIOS -->
       <div>🍰 Artesanales</div>
@@ -715,6 +720,7 @@ onMounted(() => {
 }
 /* PROMO BANNER */
 .promo-banner {
+  position: relative; /* CLAVE para posicionar el botón */
   grid-column: 1 / -1;
   margin-bottom: 1.2rem;
   cursor: pointer;
@@ -728,6 +734,29 @@ onMounted(() => {
   border-radius: 20px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   transition: transform 0.25s ease;
+}
+
+/* BOTÓN OVERLAY */
+.promo-btn {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+
+  background: #ff4d6d;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  transition: all 0.25s ease;
+}
+
+.promo-btn:hover {
+  transform: scale(1.05);
+  background: #e63956;
 }
 
 .promo-banner img:hover {
