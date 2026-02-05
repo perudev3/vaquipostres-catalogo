@@ -520,7 +520,7 @@ onMounted(() => {
 /* HERO */
 .hero {
   margin-top: 90px;
-  height: 75vh;
+  height: 55vh;
   background: linear-gradient(
     rgba(255,255,255,0.8),
     rgba(255,255,255,0.9)
@@ -545,7 +545,7 @@ onMounted(() => {
 }
 
 .hero-box h1 {
-  font-size: 2.6rem;
+  font-size: 1.6rem;
 }
 
 .hero-box button {
